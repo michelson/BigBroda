@@ -9,9 +9,10 @@ module GoogleBigquery
   autoload  :Config,   'google_bigquery/config.rb'
   autoload  :Auth,     'google_bigquery/auth.rb'
   autoload  :Client,   'google_bigquery/client.rb'
-  autoload  :Project,    'google_bigquery/project.rb'
+  autoload  :Project,  'google_bigquery/project.rb'
   autoload  :Dataset,  'google_bigquery/dataset.rb'
   autoload  :Table,    'google_bigquery/table.rb'
+  autoload  :TableData,'google_bigquery/table_data.rb'
   autoload  :Jobs,     'google_bigquery/jobs.rb'
 
 

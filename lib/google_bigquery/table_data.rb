@@ -1,10 +1,29 @@
 
 module GoogleBigquery
-  class Table < GoogleBigquery::Client
+  class TableData < GoogleBigquery::Client
 
-    #TODO: move to table data
     def stream(body, opts)
-      parse_response @client.client.execute( @client.api.tabledata.insert_all, projectId: "agile-kite-497", datasetId: "bwit", tableId: "TABLEID", body: "foo")
+      parse_response @client.client.execute( @client.api.tabledata.insert_all, projectId: "agile-kite-497", 
+        datasetId: "bwit", 
+        tableId: "TABLEID", 
+        body: "foo")
+    end
+
+    def self.create(project_id, dataset_id, table_id, body={})
+      res = GoogleBigquery::Auth.client.execute(
+        :api_method=> GoogleBigquery::Auth.api.tabledata.insert_all, 
+        :body_object=> body , #{"datasetReference"=> {"datasetId" =>"whoa"}}, 
+        :parameters=> {"projectId"=> project_id, "datasetId"=> dataset_id, "tableId"=>table_id }
+      )
+      parse_response(res)
+    end
+
+    def self.list(project_id, dataset_id, table_id)
+      res = GoogleBigquery::Auth.client.execute(
+        :api_method=> GoogleBigquery::Auth.api.tabledata.list, 
+        :parameters=> {"projectId"=> project_id, "datasetId"=> dataset_id, "tableId"=>table_id }
+      )
+      parse_response(res)
     end
 
   end

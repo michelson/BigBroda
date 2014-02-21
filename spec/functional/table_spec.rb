@@ -31,10 +31,12 @@ describe "Dataset" do
                             "projectId"=> @project,
                             "datasetId"=> @name,
                             "tableId"=> @table_name}, 
-                "schema"=> [{:id=> "name", :type=> "string", :mode => "REQUIRED"},
-                            {:id=>  "age", :type=> "integer"},
-                            {:id=> "weight", :type=> "float"},
-                            {:id=> "is_magic", :type=> "boolean"}]
+                "schema"=> [fields: 
+                              {:name=> "name", :type=> "string", :mode => "REQUIRED"},
+                              {:name=>  "age", :type=> "integer"},
+                              {:name=> "weight", :type=> "float"},
+                              {:name=> "is_magic", :type=> "boolean"}
+                          ]
               }
       end
 
