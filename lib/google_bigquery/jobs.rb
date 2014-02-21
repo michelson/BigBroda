@@ -5,6 +5,8 @@ module GoogleBigquery
       @client = client
     end
 
+    #query
+    #Runs a BigQuery SQL query synchronously and returns query results if the query completes within a specified timeout. 
     def self.query(project_id, body={})
       res = GoogleBigquery::Auth.client.execute(
         :api_method=> GoogleBigquery::Auth.api.jobs.query, 
@@ -14,5 +16,45 @@ module GoogleBigquery
       parse_response(res)
 
     end
+
+    #Retrieves the specified job by ID.
+    def self.get(project_id , job_id)
+      res = GoogleBigquery::Auth.client.execute(
+        :api_method=> GoogleBigquery::Auth.api.jobs.get, 
+        :parameters=> {"projectId"=> project_id, "jobId"=>job_id}
+      )
+      parse_response(res)
+    end
+
+    #Retrieves the results of a query job.
+    def self.getQueryResults(project_id , job_id, body={})
+      res = GoogleBigquery::Auth.client.execute(
+        :api_method=> GoogleBigquery::Auth.api.jobs.get_query_results, 
+        :body_object=> body, 
+        :parameters=> {"projectId"=> project_id, "jobId"=>job_id}
+      )
+      parse_response(res)
+    end
+
+    #Starts a new asynchronous job.
+    def self.insert(project_id, body={})
+      res = GoogleBigquery::Auth.client.execute(
+        :api_method=> GoogleBigquery::Auth.api.jobs.insert, 
+        :body_object=> body, 
+        :parameters=> {"projectId"=> project_id}
+      )
+      parse_response(res)
+    end
+
+    #Lists all the Jobs in the specified project that were started by the user.
+    def self.list(project_id, body={})
+      res = GoogleBigquery::Auth.client.execute(
+        :api_method=> GoogleBigquery::Auth.api.jobs.list, 
+        :body_object=> body, 
+        :parameters=> {"projectId"=> project_id}
+      )
+      parse_response(res)
+    end
+
   end
 end
