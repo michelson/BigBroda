@@ -56,10 +56,10 @@ module GoogleBigquery
     def self.delete(project_id, dataset_id, body={})
       res = GoogleBigquery::Auth.client.execute(
         :api_method=> GoogleBigquery::Auth.api.datasets.delete, 
-        :body_object=> body, #{"deleteContents"=> false}, 
+        #:body_object=> {"deleteContents"=> true}, 
         :parameters=> {"projectId"=> project_id, "datasetId" => dataset_id }
       )
-      true if res.status == 204 #res.body
+       res.status == 204 ?  true : parse_response(res)
     end
 
   end

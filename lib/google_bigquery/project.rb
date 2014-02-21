@@ -1,11 +1,15 @@
 
 module GoogleBigquery
-  class Project
+  class Project < GoogleBigquery::Client
 
-    attr_accessor :client
+    attr_accessor :options 
 
-    def list
-      parse_response @client.client.execute( @client.api.projects.list)
+    def initialize( opts={})
+      super
+    end
+
+    def self.list
+      parse_response GoogleBigquery::Auth.client.execute( GoogleBigquery::Auth.api.projects.list)
     end
 
   end

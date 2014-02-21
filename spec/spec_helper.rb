@@ -29,6 +29,7 @@ RSpec.configure do |config|
       config.email       =  config_options["email"]
     end
     GoogleBigquery::Config
+    @project = config_options["options"]
   end
 
 end

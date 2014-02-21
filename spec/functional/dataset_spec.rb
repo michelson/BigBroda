@@ -5,8 +5,9 @@ describe "Dataset" do
     config_setup
     @auth = GoogleBigquery::Auth.new
     @auth.authorize
-    @project = "985884699512"
+    @project = config_options["email"].match(/(\d*)/)[0]
   end
+
   before :each do 
     @name = "whoa#{Time.now.to_i}"
   end
@@ -26,8 +27,6 @@ describe "Dataset" do
           {"datasetReference"=> { "datasetId" => @name }} )["id"]
         ).to include @name
       GoogleBigquery::Dataset.delete(@project, @name) 
-
-
     end
 
     it ".update & delete" do
