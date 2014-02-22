@@ -113,6 +113,16 @@ GoogleBigquery::Project.list["projects"]
 
   https://developers.google.com/bigquery/docs/reference/v2/jobs
 
+#### Exporting data into multiple files
+
+BigQuery can export up to 1 GB of data per file. If you plan to export more than 1 GB, you can use a wildcard character to instruct BigQuery to export to multiple files.
+
+Note: it may take a while.
+
+```ruby
+  GoogleBigquery::Jobs.export(project_id, dataset_id, table_id, bucket_location)
+```
+
 #### Query
 
 ```ruby
@@ -249,6 +259,8 @@ GoogleBigquery::TableData.list(@project, @dataset_id, @table_name)
 ### Google Big query developer guide
 
   https://developers.google.com/bigquery/docs/developers_guide
+
+# Caveats:
 
 ## Contributing
 

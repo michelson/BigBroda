@@ -23,7 +23,7 @@ module GoogleBigquery
         :api_method=> GoogleBigquery::Auth.api.jobs.get, 
         :parameters=> {"projectId"=> project_id, "jobId"=>job_id}
       )
-      parse_response(res)
+      #parse_response(res)
     end
 
     #Retrieves the results of a query job.
@@ -54,6 +54,40 @@ module GoogleBigquery
         :parameters=> {"projectId"=> project_id}
       )
       parse_response(res)
+    end
+
+    #export data
+    def self.export(project_id, dataset_id, table_id, bucket_location)
+      body = {
+      'projectId'=> project_id,
+      'configuration'=> {
+        'extract'=> {
+          'sourceTable'=> {
+             'projectId'=> project_id,
+             'datasetId'=> dataset_id,
+             'tableId'=> table_id
+           },
+          'destinationUri'=> "gs://#{bucket_location}",
+          'destinationFormat'=> 'NEWLINE_DELIMITED_JSON'
+         }
+       }
+      }
+      res = GoogleBigquery::Auth.client.execute(
+        :api_method=> GoogleBigquery::Auth.api.jobs.insert, 
+        :body_object=> body, 
+        :parameters=> {"projectId"=> project_id}
+      )
+      job_id = JSON.parse(res.body)["jobReference"]["jobId"]
+      puts 'Waiting for export to complete..'
+      
+      loop do 
+       status = JSON.parse(self.get(project_id, job_id).body)
+       if 'DONE' == status['status']['state']
+        puts "Done exporting!"
+        return
+       end
+       sleep(10)
+      end
     end
 
   end
