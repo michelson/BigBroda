@@ -558,6 +558,18 @@ module ActiveRecord
         #exec_query "DROP INDEX #{quote_column_name(index_name)}"
       end
 
+      def add_column(table_name, column_name, type, options = {}) #:nodoc:
+        binding.pry
+
+        if supports_add_column? && valid_alter_table_options( type, options )
+          super(table_name, column_name, type, options)
+        else
+          alter_table(table_name) do |definition|
+            definition.column(column_name, type, options)
+          end
+        end
+      end
+
  
 ##TODO-START
 
@@ -620,16 +632,30 @@ module ActiveRecord
       # See: http://www.sqlite.org/lang_altertable.html
       # SQLite has an additional restriction on the ALTER TABLE statement
       def valid_alter_table_options( type, options)
-        #type.to_sym != :primary_key
+        type.to_sym != :primary_key
       end
 
       def add_column(table_name, column_name, type, options = {}) #:nodoc:
+       
         if supports_add_column? && valid_alter_table_options( type, options )
-          super(table_name, column_name, type, options)
+        
+          hsh = table_name.classify.constantize.columns.map { |c|  {"name"=> c.name, "type"=> c.type }  }
+          hsh << {:name=> column_name, :type=> type}
+          fields = [ fields: hsh ]
+
+          res = GoogleBigquery::Table.patch(@config[:project], @config[:database], table_name,
+            {"tableReference"=> {
+             "projectId" => @config[:project],
+             "datasetId" =>@config[:database],
+             "tableId"  => table_name }, 
+             "schema"   => fields,
+            "description"=> "added from migration"} )
+        
         else
-          alter_table(table_name) do |definition|
-            definition.column(column_name, type, options)
-          end
+          raise Error::NotImplementedFeature
+          #alter_table(table_name) do |definition|
+          #  definition.column(column_name, type, options)
+          #end
         end
       end
 
@@ -703,6 +729,7 @@ module ActiveRecord
 
 ###TODO
         def alter_table(table_name, options = {}) #:nodoc:
+          binding.pry
           altered_table_name = "a#{table_name}"
           caller = lambda {|definition| yield definition if block_given?}
 
@@ -777,7 +804,7 @@ module ActiveRecord
           quoted_to = quote_table_name(to)
 
           raw_column_mappings = Hash[columns(from).map { |c| [c.name, c] }]
-
+          binding.pry
           exec_query("SELECT * FROM #{quote_table_name(from)}").each do |row|
             sql = "INSERT INTO #{quoted_to} (#{quoted_columns}) VALUES ("
 

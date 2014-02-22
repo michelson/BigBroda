@@ -128,6 +128,7 @@ describe "ActiveRecord Adapter" do
     }
 
     let(:migration) { CreateUsers.new}
+    let(:add_col_migration) { AddPublishedToUser.new}
    
     describe '#up' do
       before { 
@@ -152,6 +153,18 @@ describe "ActiveRecord Adapter" do
         User.should_not be_table_exists
       end
 
+    end
+
+    describe "add column" do 
+      before { 
+        expect(dataset["id"]).to include @name
+        migration.up; User.reset_column_information 
+        add_col_migration.change; User.reset_column_information 
+      }
+     
+      it 'adds published column' do
+        User.columns_hash.should have_key('published')
+      end
     end
   end
 
