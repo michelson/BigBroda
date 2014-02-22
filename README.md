@@ -27,7 +27,7 @@ Or install it yourself as:
 
 #### Connection
 
-As you would normaly do , in active record plain ruby example.
+ActiveRecord connection in plain ruby:
 
 ```ruby
     ActiveRecord::Base.establish_connection(
@@ -37,11 +37,11 @@ As you would normaly do , in active record plain ruby example.
     )
 ```
 
-In Rails app you can use the :adapter, :project and :database options in yout database.yml
+In Rails app you can use the :adapter, :project and :database options in your database.yml or use the stablish connection in specific models.
 
 #### Quering
 
-  The GoogleBigQuery Adapter brings some of the activerecord nicieties out of the box:
+  The GoogleBigQuery Adapter brings some of the ActiveRecord nicieties out of the box:
 
 ```ruby
 User.all
@@ -63,7 +63,7 @@ User.where("id =? and name= ?", "some-id-1393025921", "Frank")
   @user.save
 ```
 
-by default the adapter will set Id values as an SecureRandom.hex 
+NOTE: by default the adapter will set Id values as an SecureRandom.hex 
 
 #### Deletion and edition of single rows:
 
