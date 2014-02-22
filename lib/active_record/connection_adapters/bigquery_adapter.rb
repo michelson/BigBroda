@@ -10,14 +10,12 @@ module ActiveRecord
 
   module Error
     class Standard < StandardError; end
-
     class NotImplementedFeature < Standard
       def message
         "This Adapter doesn't offer updating single rows, Google Big query is append only by design"
       end
     end
   end
-
 
   module ConnectionHandling # :nodoc:
     # bigquery adapter reuses GoogleBigquery::Auth.
@@ -125,7 +123,45 @@ module ActiveRecord
     end
   end
 
+  class SchemaMigration < ActiveRecord::Base
+
+    def self.create_table(limit=nil)
+      unless connection.table_exists?(table_name)
+        puts "SCHEMA MIGRATION HERE"
+      #  version_options = {null: false}
+      #  version_options[:limit] = limit if limit
+
+      #  connection.create_table(table_name, id: false) do |t|
+      #    t.column :version, :string, version_options
+      #  end
+      #  connection.add_index table_name, :version, unique: true, name: index_name
+      end
+    end
+    def self.drop_table
+      if connection.table_exists?(table_name)
+        puts "SCHEMA MIGRATION DROP"
+        #connection.remove_index table_name, name: index_name
+        #connection.drop_table(table_name)
+      end
+    end
+  end
+
   module ConnectionAdapters
+
+      #STRING, INTEGER, FLOAT, BOOLEAN, TIMESTAMP or RECORD
+      NATIVE_DATABASE_TYPES = {
+        primary_key: "STRING",
+        string:      { name: "STRING" },
+        text:        { name: "STRING" },
+        integer:     { name: "INTEGER" },
+        float:       { name: "FLOAT" },
+        decimal:     { name: "INTEGER" },
+        datetime:    { name: "TIMESTAMP" },
+        timestamp:   { name: "TIMESTAMP" },
+        boolean:     { name: "BOOLEAN" },
+        uuid:        { name: "STRING" },
+        json:        { name: "RECORD" },
+      }
     
     class BigqueryColumn < Column
       class << self
@@ -141,6 +177,41 @@ module ActiveRecord
     class BigqueryAdapter < AbstractAdapter
       
       class Version
+      end
+
+
+      class ColumnDefinition < ActiveRecord::ConnectionAdapters::ColumnDefinition
+        attr_accessor :array
+
+        def primary_key(name, type = :primary_key, options = {})
+          binding.pry
+          return super unless type == :uuid
+          options[:default] = options.fetch(:default, 'uuid_generate_v4()')
+          options[:primary_key] = true
+          binding.pry
+          column name, type, options
+        end
+
+      end
+
+      class TableDefinition < ActiveRecord::ConnectionAdapters::TableDefinition
+
+        def primary_key(name, type = :primary_key, options = {})
+          return column name, :string, options
+        end
+
+        def record(*args)
+          options = args.extract_options!
+          column(:created_at, :record, options)
+        end
+
+        def timestamps(*args)
+          options = args.extract_options!
+          column(:created_at, :timestamp, options)
+          column(:updated_at, :timestamp, options)
+        end
+
+
       end
 
       class StatementPool < ConnectionAdapters::StatementPool
@@ -222,11 +293,11 @@ module ActiveRecord
 
       # Returns true, since this connection adapter supports migrations.
       def supports_migrations? #:nodoc:
-        false
+        true
       end
 
       def supports_primary_key? #:nodoc:
-        false
+        true
       end
 
       def requires_reloading?
@@ -234,7 +305,7 @@ module ActiveRecord
       end
 
       def supports_add_column?
-        false
+        true
       end
 
       def active?
@@ -260,10 +331,10 @@ module ActiveRecord
 
       # Returns true
       def supports_count_distinct? #:nodoc:
-        false
+        true
       end
 
-      # Returns true
+      # Returns false
       def supports_autoincrement? #:nodoc:
         false
       end
@@ -279,20 +350,28 @@ module ActiveRecord
         index_name_length - 2
       end
 
+      def default_primary_key_type
+        if supports_autoincrement?
+          'STRING'
+        else
+          'STRING'
+        end
+      end
+
       def native_database_types #:nodoc:
         {
-          #:primary_key => default_primary_key_type,
+          :primary_key => default_primary_key_type,
           :string      => { :name => "STRING" },
           #:text        => { :name => "text" },
           :integer     => { :name => "INTEGER" },
           :float       => { :name => "FLOAT" },
           #:decimal     => { :name => "decimal" },
-          #:datetime    => { :name => "datetime" },
+          :datetime    => { :name => "TIMESTAMP" },
           #:timestamp   => { :name => "datetime" },
           :timestamp    => { name: "TIMESTAMP" },
           #:time        => { :name => "time" },
           #:date        => { :name => "date" },
-          #:binary      => { :name => "blob" },
+          :record      => { :name => "RECORD" },
           :boolean     => { :name => "BOOLEAN" }
         }
       end
@@ -302,9 +381,9 @@ module ActiveRecord
         @connection.encoding.to_s
       end
 
-      # Returns true.
+      # Returns false.
       def supports_explain?
-        true
+        false
       end
 
       # QUOTING ==================================================
@@ -417,16 +496,6 @@ module ActiveRecord
         log(sql, name) { @connection.execute(sql) }
       end
 
-      def update_sql(sql, name = nil) #:nodoc:
-        super
-        @connection.changes
-      end
-
-      def delete_sql(sql, name = nil) #:nodoc:
-        sql += " WHERE 1=1" unless sql =~ /WHERE/i
-        super sql, name
-      end
-
       def insert_sql(sql, name = nil, pk = nil, id_value = nil, sequence_name = nil) #:nodoc:
         super
         id_value || @connection.last_insert_row_id
@@ -455,6 +524,7 @@ module ActiveRecord
 
       def tables(name = nil, table_name = nil) #:nodoc:
         table = GoogleBigquery::Table.list(@config[:project], @config[:database])
+        return [] if table["tables"].blank?
         table_names = table["tables"].map{|o| o["tableReference"]["tableId"]}
         table_names = table_names.select{|o| o == table_name } if table_name
         table_names
@@ -476,12 +546,148 @@ module ActiveRecord
 
       # Returns an array of indexes for the given table.
       def indexes(table_name, name = nil) #:nodoc:
-        binding.pry
+        []
       end
 
       def primary_key(table_name) #:nodoc:
         "id"
       end
+
+      def remove_index!(table_name, index_name) #:nodoc:
+        puts "TODO: NEXT FEATURE"
+        #exec_query "DROP INDEX #{quote_column_name(index_name)}"
+      end
+
+ 
+##TODO-START
+
+      # See also TableDefinition#column for details on how to create columns.
+      def create_table(table_name, options = {})
+        td = create_table_definition table_name, options[:temporary], options[:options]
+
+        unless options[:id] == false
+          pk = options.fetch(:primary_key) {
+            Base.get_primary_key table_name.to_s.singularize
+          }
+
+          td.primary_key pk, options.fetch(:id, :primary_key), options
+        end
+
+        yield td if block_given?
+
+        if options[:force] && table_exists?(table_name)
+          drop_table(table_name, options)
+        end
+        
+
+        hsh = td.columns.map { |c|  {"name"=> c[:name], "type"=> c[:type] }  }
+
+        @table_body = {  "tableReference"=> {
+                            "projectId"=> @config[:project],
+                            "datasetId"=> @config[:database],
+                            "tableId"=> td.name}, 
+                "schema"=> [fields: hsh]
+              }
+
+        res = GoogleBigquery::Table.create(@config[:project], @config[:database], @table_body )
+
+        raise res["error"]["errors"].map{|o| "[#{o['domain']}]: #{o['reason']} #{o['message']}" }.join(", ") if res["error"].present?
+        
+        puts "TABLE CREATED: #{res['selfLink']}"
+        #execute schema_creation.accept td
+        #td.indexes.each_pair { |c,o| add_index table_name, c, o }
+      end
+
+      # See also Table for details on all of the various column transformation.
+      def change_table(table_name, options = {})
+        if supports_bulk_alter? && options[:bulk]
+          recorder = ActiveRecord::Migration::CommandRecorder.new(self)
+          yield update_table_definition(table_name, recorder)
+          bulk_change_table(table_name, recorder.commands)
+        else
+          yield update_table_definition(table_name, self)
+        end
+      end
+      # Renames a table.
+      #
+      # Example:
+      #   rename_table('octopuses', 'octopi')
+      def rename_table(table_name, new_name)
+        exec_query "ALTER TABLE #{quote_table_name(table_name)} RENAME TO #{quote_table_name(new_name)}"
+        rename_table_indexes(table_name, new_name)
+      end
+
+      # See: http://www.sqlite.org/lang_altertable.html
+      # SQLite has an additional restriction on the ALTER TABLE statement
+      def valid_alter_table_options( type, options)
+        #type.to_sym != :primary_key
+      end
+
+      def add_column(table_name, column_name, type, options = {}) #:nodoc:
+        if supports_add_column? && valid_alter_table_options( type, options )
+          super(table_name, column_name, type, options)
+        else
+          alter_table(table_name) do |definition|
+            definition.column(column_name, type, options)
+          end
+        end
+      end
+
+      def remove_column(table_name, column_name, type = nil, options = {}) #:nodoc:
+        alter_table(table_name) do |definition|
+          definition.remove_column column_name
+        end
+      end
+
+      def change_column_default(table_name, column_name, default) #:nodoc:
+        alter_table(table_name) do |definition|
+          definition[column_name].default = default
+        end
+      end
+
+      def change_column_null(table_name, column_name, null, default = nil)
+        unless null || default.nil?
+          exec_query("UPDATE #{quote_table_name(table_name)} SET #{quote_column_name(column_name)}=#{quote(default)} WHERE #{quote_column_name(column_name)} IS NULL")
+        end
+        alter_table(table_name) do |definition|
+          definition[column_name].null = null
+        end
+      end
+
+      def change_column(table_name, column_name, type, options = {}) #:nodoc:
+        alter_table(table_name) do |definition|
+          include_default = options_include_default?(options)
+          definition[column_name].instance_eval do
+            self.type    = type
+            self.limit   = options[:limit] if options.include?(:limit)
+            self.default = options[:default] if include_default
+            self.null    = options[:null] if options.include?(:null)
+            self.precision = options[:precision] if options.include?(:precision)
+            self.scale   = options[:scale] if options.include?(:scale)
+          end
+        end
+      end
+
+      def rename_column(table_name, column_name, new_column_name) #:nodoc:
+        unless columns(table_name).detect{|c| c.name == column_name.to_s }
+          raise ActiveRecord::ActiveRecordError, "Missing column #{table_name}.#{column_name}"
+        end
+        alter_table(table_name, :rename => {column_name.to_s => new_column_name.to_s})
+        rename_column_indexes(table_name, column_name, new_column_name)
+      end
+
+      def add_reference(table_name, ref_name, options = {})
+        polymorphic = options.delete(:polymorphic)
+        index_options = options.delete(:index)
+        add_column(table_name, "#{ref_name}_id", :integer, options)
+        add_column(table_name, "#{ref_name}_type", :string, polymorphic.is_a?(Hash) ? polymorphic : options) if polymorphic
+        add_index(table_name, polymorphic ? %w[id type].map{ |t| "#{ref_name}_#{t}" } : "#{ref_name}_id", index_options.is_a?(Hash) ? index_options : nil) if index_options
+      end
+
+      def drop_table(table_name)
+        GoogleBigquery::Table.delete(@config[:project], @config[:database], table_name )
+      end
+##TODO-END
 
       protected
         def select(sql, name = nil, binds = []) #:nodoc:
@@ -494,6 +700,101 @@ module ActiveRecord
           raise(ActiveRecord::StatementInvalid, "Could not find table '#{table_name}'") if structure.empty?
           structure
         end
+
+###TODO
+        def alter_table(table_name, options = {}) #:nodoc:
+          altered_table_name = "a#{table_name}"
+          caller = lambda {|definition| yield definition if block_given?}
+
+          transaction do
+            move_table(table_name, altered_table_name,
+              options.merge(:temporary => true))
+            move_table(altered_table_name, table_name, &caller)
+          end
+        end
+
+        def move_table(from, to, options = {}, &block) #:nodoc:
+          copy_table(from, to, options, &block)
+          drop_table(from)
+        end
+
+        def copy_table(from, to, options = {}) #:nodoc:
+          from_primary_key = primary_key(from)
+          options[:id] = false
+          create_table(to, options) do |definition|
+            @definition = definition
+            @definition.primary_key(from_primary_key) if from_primary_key.present?
+            columns(from).each do |column|
+              column_name = options[:rename] ?
+                (options[:rename][column.name] ||
+                 options[:rename][column.name.to_sym] ||
+                 column.name) : column.name
+              next if column_name == from_primary_key
+
+              @definition.column(column_name, column.type,
+                :limit => column.limit, :default => column.default,
+                :precision => column.precision, :scale => column.scale,
+                :null => column.null)
+            end
+            yield @definition if block_given?
+          end
+          copy_table_indexes(from, to, options[:rename] || {})
+          copy_table_contents(from, to,
+            @definition.columns.map {|column| column.name},
+            options[:rename] || {})
+        end
+
+        def copy_table_indexes(from, to, rename = {}) #:nodoc:
+          indexes(from).each do |index|
+            name = index.name
+            if to == "a#{from}"
+              name = "t#{name}"
+            elsif from == "a#{to}"
+              name = name[1..-1]
+            end
+
+            to_column_names = columns(to).map { |c| c.name }
+            columns = index.columns.map {|c| rename[c] || c }.select do |column|
+              to_column_names.include?(column)
+            end
+
+            unless columns.empty?
+              # index name can't be the same
+              opts = { name: name.gsub(/(^|_)(#{from})_/, "\\1#{to}_"), internal: true }
+              opts[:unique] = true if index.unique
+              add_index(to, columns, opts)
+            end
+          end
+        end
+
+        def copy_table_contents(from, to, columns, rename = {}) #:nodoc:
+          column_mappings = Hash[columns.map {|name| [name, name]}]
+          rename.each { |a| column_mappings[a.last] = a.first }
+          from_columns = columns(from).collect {|col| col.name}
+          columns = columns.find_all{|col| from_columns.include?(column_mappings[col])}
+          quoted_columns = columns.map { |col| quote_column_name(col) } * ','
+
+          quoted_to = quote_table_name(to)
+
+          raw_column_mappings = Hash[columns(from).map { |c| [c.name, c] }]
+
+          exec_query("SELECT * FROM #{quote_table_name(from)}").each do |row|
+            sql = "INSERT INTO #{quoted_to} (#{quoted_columns}) VALUES ("
+
+            column_values = columns.map do |col|
+              quote(row[column_mappings[col]], raw_column_mappings[col])
+            end
+
+            sql << column_values * ', '
+            sql << ')'
+            exec_query sql
+          end
+        end
+
+        def create_table_definition(name, temporary, options)
+          TableDefinition.new native_database_types, name, temporary, options
+        end
+###TODO
 
 
     end

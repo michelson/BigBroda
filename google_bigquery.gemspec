@@ -4,13 +4,13 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'google_bigquery/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = "google_bigquery"
+  spec.name          = "bigbroda"
   spec.version       = GoogleBigquery::VERSION
   spec.authors       = ["miguel michelson"]
   spec.email         = ["miguelmichelson@gmail.com"]
   spec.description   = "Handy abstraction for GoogleBigQuery"
-  spec.summary       = "This library is build on top of google-api-client"
-  spec.homepage      = ""
+  spec.summary       = "This library is build on top of google-api-client, ActiveRecord compatible"
+  spec.homepage      = "https://github.com/michelson/google_big_data"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files`.split($/)
