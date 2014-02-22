@@ -15,10 +15,10 @@ module GoogleBigquery
       )
     end
 
-    def self.get(project_id, dataset_id)
+    def self.get(project_id, dataset_id, table_id)
       res = GoogleBigquery::Auth.client.execute(
         :api_method=> GoogleBigquery::Auth.api.tables.get, 
-        :parameters=> {"projectId"=> project_id, "datasetId"=> dataset_id }
+        :parameters=> {"projectId"=> project_id, "datasetId"=> dataset_id, "tableId"=> table_id  }
       )
       parse_response(res)
     end

@@ -8,7 +8,6 @@ describe "Config" do
 
   it "authorization object" do
     @auth.authorize
-    binding.pry
     @auth.api.class.should be Google::APIClient::API
     GoogleBigquery::Auth.api.class.should be Google::APIClient::API
     GoogleBigquery::Auth.client.class.should be Google::APIClient

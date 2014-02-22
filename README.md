@@ -19,7 +19,62 @@ Or install it yourself as:
 
     $ gem install google_bigquery
 
-## Usage
+# Usage:
+
+## Rails / ActiveRecord:
+
+### Active Record Adapter
+
+#### Connection
+
+As you would normaly do , in active record plain ruby example.
+
+```ruby
+    ActiveRecord::Base.establish_connection(
+      :adapter => 'bigquery', 
+      :project => "MyBigQueryProject",
+      :database => "MyBigTable"
+    )
+```
+
+In Rails app you can use the :adapter, :project and :database options in yout database.yml
+
+#### Quering
+
+  The GoogleBigQuery Adapter brings some of the activerecord nicieties out of the box:
+
+```ruby
+User.all
+User.first, User.last
+User.count
+User.find_by(name: "")
+User.select("name")
+User.select("name").where("name contains ?", "frank")
+User.select("name, id").where("name contains ?", "frank").count
+User.where("id =? and name= ?", "some-id-1393025921", "Frank")
+```
+
+#### Creation:
+
+```ruby
+  User.create(name: "frank capra")
+  @user  = User.new
+  @user.name = "Frank"
+  @user.save
+```
+
+by default the adapter will set Id values as an SecureRandom.hex 
+
+#### Deletion and edition of single rows:
+
+  BigQuery tables are append-only. The query language does not currently support either updating or deleting data. In order to update or delete data, you must delete the table, then recreate the table with new data. Alternatively, you could write a query that modifies the data and specify a new results table.
+
+  I would actually recommend creating a new table for each day. Since BigQuery charges by amount of data queried over, this would be most economical for you, rather than having to query over entire massive datasets every time.
+
+  By the way - how are you currently collecting your data?
+
+
+## Standalone Client:
 
 ### Configuration setup:
 
@@ -202,3 +257,9 @@ GoogleBigquery::TableData.list(@project, @dataset_id, @table_name)
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create new Pull Request
+
+ 
+#TODO:
+
+activerecord:
+  +associations

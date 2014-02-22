@@ -16,6 +16,11 @@ module GoogleBigquery
   autoload  :Jobs,     'google_bigquery/jobs.rb'
 
 
+
+  #if defined?(::ActiveRecord)
+  #  autoload  :Adapter, 'google_bigquery/adapter/abstract.rb'
+  #end
+
   if defined?(::Rails::Railtie)
     autoload  :Railtie, 'google_bigquery/railtie.rb'
     autoload  :Rails,   'google_bigquery/engine.rb' if ::Rails.version >= '3.1'
