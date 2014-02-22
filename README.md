@@ -74,6 +74,38 @@ NOTE: by default the adapter will set Id values as an SecureRandom.hex
   By the way - how are you currently collecting your data?
 
 
+
+### Migrations:
+
+This adapter has migration support for simple operations
+
+```ruby
+class CreateUsers < ActiveRecord::Migration
+  def self.up
+    create_table :users do |t|
+      t.string :name
+      t.record :nested_data
+      t.references :taggable, :polymorphic => true
+      t.boolean :admin
+      t.timestamps
+    end
+  end
+
+  def self.down
+    drop_table :users
+  end
+end
+
+class AddPublishedToUser < ActiveRecord::Migration
+  def change
+    add_column :users, :published, :boolean, default: true
+  end
+end
+
+```
+
+Note: Big query does not provide a way to update columns nor delete, so update_column, or remove_column migration are cancelled with and exeption.
+
 ## Standalone Client:
 
 ### Configuration setup:

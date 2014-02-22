@@ -26,12 +26,15 @@ class AddPublishedToUser < ActiveRecord::Migration
   end
 end
 
+class RemovePublishedToUser < ActiveRecord::Migration
+  def change
+    remove_column :users, :published
+  end
+end
 
 class User < ActiveRecord::Base 
   validates :name, presence: true
 end
-
-
 
 describe "ActiveRecord Adapter" do
 
@@ -129,6 +132,7 @@ describe "ActiveRecord Adapter" do
 
     let(:migration) { CreateUsers.new}
     let(:add_col_migration) { AddPublishedToUser.new}
+    let(:remove_col_migration) { RemovePublishedToUser.new}
    
     describe '#up' do
       before { 
@@ -166,6 +170,19 @@ describe "ActiveRecord Adapter" do
         User.columns_hash.should have_key('published')
       end
     end
+
+    describe "remove column" do 
+      before { 
+        expect(dataset["id"]).to include @name
+        migration.up; User.reset_column_information 
+        add_col_migration.change; User.reset_column_information 
+      }
+     
+      it 'should raise error' do
+        expect{remove_col_migration.change}.to raise_error
+      end
+    end
+
   end
 
 end

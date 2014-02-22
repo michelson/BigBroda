@@ -15,6 +15,11 @@ module ActiveRecord
         "This Adapter doesn't offer updating single rows, Google Big query is append only by design"
       end
     end
+    class NotImplementedColumnOperation < Standard
+      def message 
+        "Google big query doesn't allow this column operation"
+      end
+    end
   end
 
   module ConnectionHandling # :nodoc:
@@ -640,7 +645,7 @@ module ActiveRecord
         if supports_add_column? && valid_alter_table_options( type, options )
         
           hsh = table_name.classify.constantize.columns.map { |c|  {"name"=> c.name, "type"=> c.type }  }
-          hsh << {:name=> column_name, :type=> type}
+          hsh << {"name"=> column_name, :type=> type}
           fields = [ fields: hsh ]
 
           res = GoogleBigquery::Table.patch(@config[:project], @config[:database], table_name,
@@ -659,39 +664,20 @@ module ActiveRecord
         end
       end
 
-      def remove_column(table_name, column_name, type = nil, options = {}) #:nodoc:
-        alter_table(table_name) do |definition|
-          definition.remove_column column_name
-        end
+      def remove_column(table_name, column_name, type = nil, options = {}) #:nodoc: 
+        raise Error::NotImplementedColumnOperation
       end
 
       def change_column_default(table_name, column_name, default) #:nodoc:
-        alter_table(table_name) do |definition|
-          definition[column_name].default = default
-        end
+        raise Error::NotImplementedColumnOperation
       end
 
       def change_column_null(table_name, column_name, null, default = nil)
-        unless null || default.nil?
-          exec_query("UPDATE #{quote_table_name(table_name)} SET #{quote_column_name(column_name)}=#{quote(default)} WHERE #{quote_column_name(column_name)} IS NULL")
-        end
-        alter_table(table_name) do |definition|
-          definition[column_name].null = null
-        end
+        raise Error::NotImplementedColumnOperation
       end
 
       def change_column(table_name, column_name, type, options = {}) #:nodoc:
-        alter_table(table_name) do |definition|
-          include_default = options_include_default?(options)
-          definition[column_name].instance_eval do
-            self.type    = type
-            self.limit   = options[:limit] if options.include?(:limit)
-            self.default = options[:default] if include_default
-            self.null    = options[:null] if options.include?(:null)
-            self.precision = options[:precision] if options.include?(:precision)
-            self.scale   = options[:scale] if options.include?(:scale)
-          end
-        end
+        raise Error::NotImplementedColumnOperation
       end
 
       def rename_column(table_name, column_name, new_column_name) #:nodoc:
@@ -730,14 +716,14 @@ module ActiveRecord
 ###TODO
         def alter_table(table_name, options = {}) #:nodoc:
           binding.pry
-          altered_table_name = "a#{table_name}"
-          caller = lambda {|definition| yield definition if block_given?}
+          #altered_table_name = "a#{table_name}"
+          #caller = lambda {|definition| yield definition if block_given?}
 
-          transaction do
-            move_table(table_name, altered_table_name,
-              options.merge(:temporary => true))
-            move_table(altered_table_name, table_name, &caller)
-          end
+          #transaction do
+          #  move_table(table_name, altered_table_name,
+          #    options.merge(:temporary => true))
+          #  move_table(altered_table_name, table_name, &caller)
+          #end
         end
 
         def move_table(from, to, options = {}, &block) #:nodoc:
@@ -772,50 +758,11 @@ module ActiveRecord
         end
 
         def copy_table_indexes(from, to, rename = {}) #:nodoc:
-          indexes(from).each do |index|
-            name = index.name
-            if to == "a#{from}"
-              name = "t#{name}"
-            elsif from == "a#{to}"
-              name = name[1..-1]
-            end
-
-            to_column_names = columns(to).map { |c| c.name }
-            columns = index.columns.map {|c| rename[c] || c }.select do |column|
-              to_column_names.include?(column)
-            end
-
-            unless columns.empty?
-              # index name can't be the same
-              opts = { name: name.gsub(/(^|_)(#{from})_/, "\\1#{to}_"), internal: true }
-              opts[:unique] = true if index.unique
-              add_index(to, columns, opts)
-            end
-          end
+          
         end
 
         def copy_table_contents(from, to, columns, rename = {}) #:nodoc:
-          column_mappings = Hash[columns.map {|name| [name, name]}]
-          rename.each { |a| column_mappings[a.last] = a.first }
-          from_columns = columns(from).collect {|col| col.name}
-          columns = columns.find_all{|col| from_columns.include?(column_mappings[col])}
-          quoted_columns = columns.map { |col| quote_column_name(col) } * ','
 
-          quoted_to = quote_table_name(to)
-
-          raw_column_mappings = Hash[columns(from).map { |c| [c.name, c] }]
-          binding.pry
-          exec_query("SELECT * FROM #{quote_table_name(from)}").each do |row|
-            sql = "INSERT INTO #{quoted_to} (#{quoted_columns}) VALUES ("
-
-            column_values = columns.map do |col|
-              quote(row[column_mappings[col]], raw_column_mappings[col])
-            end
-
-            sql << column_values * ', '
-            sql << ')'
-            exec_query sql
-          end
         end
 
         def create_table_definition(name, temporary, options)
