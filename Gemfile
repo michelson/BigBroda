@@ -10,4 +10,6 @@ gem "certified"
 gem "debugger"
 gem "rspec"
 gem "pry"
+gem 'pry-remote'
+gem 'pry-nav'
 

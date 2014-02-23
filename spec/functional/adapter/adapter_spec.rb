@@ -20,6 +20,21 @@ class CreateUsers < ActiveRecord::Migration
   end
 end
 
+class CreatePosts < ActiveRecord::Migration
+  def self.up
+    create_table :posts do |t|
+      t.string :title
+      t.references :user
+      t.boolean :admin
+      t.timestamps
+    end
+  end
+
+  def self.down
+    drop_table :users
+  end
+end
+
 class AddPublishedToUser < ActiveRecord::Migration
   def change
     add_column :users, :published, :boolean, default: true
@@ -34,6 +49,12 @@ end
 
 class User < ActiveRecord::Base 
   validates :name, presence: true
+  has_many :posts
+end
+
+class Post < ActiveRecord::Base 
+  validates :title, presence: true
+  belongs_to :user
 end
 
 describe "ActiveRecord Adapter" do
@@ -131,6 +152,7 @@ describe "ActiveRecord Adapter" do
     }
 
     let(:migration) { CreateUsers.new}
+    let(:posts_migration) { CreatePosts.new}
     let(:add_col_migration) { AddPublishedToUser.new}
     let(:remove_col_migration) { RemovePublishedToUser.new}
    
@@ -182,6 +204,21 @@ describe "ActiveRecord Adapter" do
         expect{remove_col_migration.change}.to raise_error
       end
     end
+
+    describe "associations" do 
+      before { 
+        expect(dataset["id"]).to include @name
+        migration.up; User.reset_column_information 
+        posts_migration.up; Post.reset_column_information 
+      }
+
+      it "sfsdf" do 
+        User.create(name: "ALF")
+        binding.pry
+      end
+    end
+
+
 
   end
 

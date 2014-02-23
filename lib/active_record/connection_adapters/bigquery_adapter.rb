@@ -46,13 +46,14 @@ module ActiveRecord
       #db.busy_timeout(ConnectionAdapters::SQLite3Adapter.type_cast_config_to_integer(config[:timeout])) if config[:timeout]
       ConnectionAdapters::BigqueryAdapter.new(db, logger, config)
     rescue  => e
+      raise e
       #Errno::ENOENT => error
       #if error.message.include?("No such file or directory")
       #  raise ActiveRecord::NoDatabaseError.new(error.message)
       #else
       #  raise error
       #end
-      binding.pry
+      #binding.pry
     end
   end
 
@@ -153,20 +154,20 @@ module ActiveRecord
 
   module ConnectionAdapters
 
-      #STRING, INTEGER, FLOAT, BOOLEAN, TIMESTAMP or RECORD
-      NATIVE_DATABASE_TYPES = {
-        primary_key: "STRING",
-        string:      { name: "STRING" },
-        text:        { name: "STRING" },
-        integer:     { name: "INTEGER" },
-        float:       { name: "FLOAT" },
-        decimal:     { name: "INTEGER" },
-        datetime:    { name: "TIMESTAMP" },
-        timestamp:   { name: "TIMESTAMP" },
-        boolean:     { name: "BOOLEAN" },
-        uuid:        { name: "STRING" },
-        json:        { name: "RECORD" },
-      }
+    #STRING, INTEGER, FLOAT, BOOLEAN, TIMESTAMP or RECORD
+    NATIVE_DATABASE_TYPES = {
+      primary_key: "STRING",
+      string:      { name: "STRING" },
+      text:        { name: "STRING" },
+      integer:     { name: "INTEGER" },
+      float:       { name: "FLOAT" },
+      decimal:     { name: "INTEGER" },
+      datetime:    { name: "TIMESTAMP" },
+      timestamp:   { name: "TIMESTAMP" },
+      boolean:     { name: "BOOLEAN" },
+      uuid:        { name: "STRING" },
+      json:        { name: "RECORD" },
+    }
     
     class BigqueryColumn < Column
       class << self
@@ -175,6 +176,12 @@ module ActiveRecord
             value = value.force_encoding(Encoding::ASCII_8BIT)
           end
           value
+        end
+
+        def string_to_time(string)
+          return string unless string.is_a?(String)
+          return nil if string.empty?
+          fast_string_to_time(string) || fallback_string_to_time(string) || Time.at(string.to_f).send(Base.default_timezone)
         end
       end
     end
@@ -187,15 +194,6 @@ module ActiveRecord
 
       class ColumnDefinition < ActiveRecord::ConnectionAdapters::ColumnDefinition
         attr_accessor :array
-
-        def primary_key(name, type = :primary_key, options = {})
-          binding.pry
-          return super unless type == :uuid
-          options[:default] = options.fetch(:default, 'uuid_generate_v4()')
-          options[:primary_key] = true
-          binding.pry
-          column name, type, options
-        end
 
       end
 
@@ -215,7 +213,6 @@ module ActiveRecord
           column(:created_at, :timestamp, options)
           column(:updated_at, :timestamp, options)
         end
-
 
       end
 
@@ -287,13 +284,13 @@ module ActiveRecord
       end
 
       def supports_partial_index?
-        false
+        true
       end
 
       # Returns true, since this connection adapter supports prepared statement
       # caching.
       def supports_statement_cache?
-        false
+        true
       end
 
       # Returns true, since this connection adapter supports migrations.
@@ -366,10 +363,10 @@ module ActiveRecord
       def native_database_types #:nodoc:
         {
           :primary_key => default_primary_key_type,
-          :string      => { :name => "STRING" },
+          :string      => { :name => "STRING", :default=> nil },
           #:text        => { :name => "text" },
-          :integer     => { :name => "INTEGER" },
-          :float       => { :name => "FLOAT" },
+          :integer     => { :name => "INTEGER", :default=> nil },
+          :float       => { :name => "FLOAT", :default=> 0.0 },
           #:decimal     => { :name => "decimal" },
           :datetime    => { :name => "TIMESTAMP" },
           #:timestamp   => { :name => "datetime" },
@@ -466,11 +463,12 @@ module ActiveRecord
             # "SELECT * FROM [#{@name}.#{@table_name}] LIMIT 1000"
             #binding.pry
             result = GoogleBigquery::Jobs.query(@config[:project], {"query"=> sql })
+            #binding.pry
             cols    = result["schema"]["fields"].map{|o| o["name"]} #stmt.columns
             records = result["rows"].map{|o| o["f"].map{|k,v| k["v"]} }
             stmt = records
           else
-            binding.pry
+            #binding.pry
             cache = @statements[sql] ||= {
               :stmt => @connection.prepare(sql)
             }
@@ -523,8 +521,6 @@ module ActiveRecord
         log('rollback transaction',nil) { } #@connection.rollback
       end
 
-
-
       # SCHEMA STATEMENTS ========================================
 
       def tables(name = nil, table_name = nil) #:nodoc:
@@ -545,7 +541,8 @@ module ActiveRecord
 
         schema["schema"]["fields"].map do |field|
           mode = field['mode'].present? && field['mode'] == "REQUIRED" ? false : true
-          BigqueryColumn.new(field['name'], field['name'], field['type'], mode )
+          #column expects (name, default, sql_type = nil, null = true)
+          BigqueryColumn.new(field['name'], nil, field['type'], mode )
         end
       end
 
@@ -559,13 +556,10 @@ module ActiveRecord
       end
 
       def remove_index!(table_name, index_name) #:nodoc:
-        puts "TODO: NEXT FEATURE"
         #exec_query "DROP INDEX #{quote_column_name(index_name)}"
       end
 
       def add_column(table_name, column_name, type, options = {}) #:nodoc:
-        binding.pry
-
         if supports_add_column? && valid_alter_table_options( type, options )
           super(table_name, column_name, type, options)
         else
@@ -574,9 +568,6 @@ module ActiveRecord
           end
         end
       end
-
- 
-##TODO-START
 
       # See also TableDefinition#column for details on how to create columns.
       def create_table(table_name, options = {})
@@ -603,16 +594,14 @@ module ActiveRecord
                             "projectId"=> @config[:project],
                             "datasetId"=> @config[:database],
                             "tableId"=> td.name}, 
-                "schema"=> [fields: hsh]
-              }
+                          "schema"=> [fields: hsh]
+                      }
 
         res = GoogleBigquery::Table.create(@config[:project], @config[:database], @table_body )
 
         raise res["error"]["errors"].map{|o| "[#{o['domain']}]: #{o['reason']} #{o['message']}" }.join(", ") if res["error"].present?
         
         puts "TABLE CREATED: #{res['selfLink']}"
-        #execute schema_creation.accept td
-        #td.indexes.each_pair { |c,o| add_index table_name, c, o }
       end
 
       # See also Table for details on all of the various column transformation.
@@ -681,11 +670,7 @@ module ActiveRecord
       end
 
       def rename_column(table_name, column_name, new_column_name) #:nodoc:
-        unless columns(table_name).detect{|c| c.name == column_name.to_s }
-          raise ActiveRecord::ActiveRecordError, "Missing column #{table_name}.#{column_name}"
-        end
-        alter_table(table_name, :rename => {column_name.to_s => new_column_name.to_s})
-        rename_column_indexes(table_name, column_name, new_column_name)
+        raise Error::NotImplementedColumnOperation
       end
 
       def add_reference(table_name, ref_name, options = {})
@@ -699,7 +684,7 @@ module ActiveRecord
       def drop_table(table_name)
         GoogleBigquery::Table.delete(@config[:project], @config[:database], table_name )
       end
-##TODO-END
+
 
       protected
         def select(sql, name = nil, binds = []) #:nodoc:
@@ -707,23 +692,13 @@ module ActiveRecord
         end
 
         def table_structure(table_name)
-          #structure = exec_query("PRAGMA table_info(#{quote_table_name(table_name)})", 'SCHEMA').to_hash
           structure = GoogleBigquery::Table.get(@config[:project], @config[:database], table_name)["schema"]["fields"]
           raise(ActiveRecord::StatementInvalid, "Could not find table '#{table_name}'") if structure.empty?
           structure
         end
 
-###TODO
         def alter_table(table_name, options = {}) #:nodoc:
-          binding.pry
-          #altered_table_name = "a#{table_name}"
-          #caller = lambda {|definition| yield definition if block_given?}
 
-          #transaction do
-          #  move_table(table_name, altered_table_name,
-          #    options.merge(:temporary => true))
-          #  move_table(altered_table_name, table_name, &caller)
-          #end
         end
 
         def move_table(from, to, options = {}, &block) #:nodoc:
@@ -732,29 +707,7 @@ module ActiveRecord
         end
 
         def copy_table(from, to, options = {}) #:nodoc:
-          from_primary_key = primary_key(from)
-          options[:id] = false
-          create_table(to, options) do |definition|
-            @definition = definition
-            @definition.primary_key(from_primary_key) if from_primary_key.present?
-            columns(from).each do |column|
-              column_name = options[:rename] ?
-                (options[:rename][column.name] ||
-                 options[:rename][column.name.to_sym] ||
-                 column.name) : column.name
-              next if column_name == from_primary_key
-
-              @definition.column(column_name, column.type,
-                :limit => column.limit, :default => column.default,
-                :precision => column.precision, :scale => column.scale,
-                :null => column.null)
-            end
-            yield @definition if block_given?
-          end
-          copy_table_indexes(from, to, options[:rename] || {})
-          copy_table_contents(from, to,
-            @definition.columns.map {|column| column.name},
-            options[:rename] || {})
+           
         end
 
         def copy_table_indexes(from, to, rename = {}) #:nodoc:
@@ -768,8 +721,6 @@ module ActiveRecord
         def create_table_definition(name, temporary, options)
           TableDefinition.new native_database_types, name, temporary, options
         end
-###TODO
-
 
     end
     

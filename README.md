@@ -307,3 +307,6 @@ GoogleBigquery::TableData.list(@project, @dataset_id, @table_name)
 
 activerecord:
   +associations
+  + AR schema migration table
+  + AR migration copy tables to update it
+  + AR migrate record type
