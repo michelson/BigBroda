@@ -486,6 +486,9 @@ module ActiveRecord
             #binding.pry
             result = GoogleBigquery::Jobs.query(@config[:project], {"query"=> sql })
             #binding.pry
+            return [] result["totalRows"].to_i.zero?
+            raise res["error"]["errors"].map{|o| "[#{o['domain']}]: #{o['reason']} #{o['message']}" }.join(", ") if res["error"].present?
+
             cols    = result["schema"]["fields"].map{|o| o["name"]} #stmt.columns
             records = result["rows"].map{|o| o["f"].map{|k,v| k["v"]} }
             stmt = records

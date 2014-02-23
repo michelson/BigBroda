@@ -53,7 +53,21 @@ User.select("name").where("name contains ?", "frank")
 User.select("name, id").where("name contains ?", "frank").count
 User.where("id =? and name= ?", "some-id-1393025921", "Frank")
 User.where.not("admin = ?", false)
+User.admins.joins(:posts)
 ```
+
+#### Note about Joins:
+
+BigQuery supports two types of JOIN operations:
+
+  + JOIN requires that the right-side table contains less than 8 MB of compressed data.
+  + JOIN EACH allows join queries for tables of any size.
+
+BigQuery supports INNER and LEFT OUTER joins. The default is INNER.
+
+see more at: https://developers.google.com/bigquery/query-reference#joins
+
+
 
 #### Creation:
 
