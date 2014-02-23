@@ -52,6 +52,7 @@ User.select("name")
 User.select("name").where("name contains ?", "frank")
 User.select("name, id").where("name contains ?", "frank").count
 User.where("id =? and name= ?", "some-id-1393025921", "Frank")
+User.where.not("admin = ?", false)
 ```
 
 #### Creation:

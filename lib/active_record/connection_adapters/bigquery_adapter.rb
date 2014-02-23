@@ -217,6 +217,17 @@ module ActiveRecord
           column(:updated_at, :timestamp, options)
         end
 
+        def references(*args)
+          options = args.extract_options!
+          polymorphic = options.delete(:polymorphic)
+          index_options = options.delete(:index)
+          args.each do |col|
+            column("#{col}_id", :string, options)
+            column("#{col}_type", :string, polymorphic.is_a?(Hash) ? polymorphic : options) if polymorphic
+            index(polymorphic ? %w(id type).map { |t| "#{col}_#{t}" } : "#{col}_id", index_options.is_a?(Hash) ? index_options : {}) if index_options
+          end
+        end
+
       end
 
       class StatementPool < ConnectionAdapters::StatementPool
@@ -687,7 +698,7 @@ module ActiveRecord
       def add_reference(table_name, ref_name, options = {})
         polymorphic = options.delete(:polymorphic)
         index_options = options.delete(:index)
-        add_column(table_name, "#{ref_name}_id", :integer, options)
+        add_column(table_name, "#{ref_name}_id", :string, options)
         add_column(table_name, "#{ref_name}_type", :string, polymorphic.is_a?(Hash) ? polymorphic : options) if polymorphic
         add_index(table_name, polymorphic ? %w[id type].map{ |t| "#{ref_name}_#{t}" } : "#{ref_name}_id", index_options.is_a?(Hash) ? index_options : nil) if index_options
       end
