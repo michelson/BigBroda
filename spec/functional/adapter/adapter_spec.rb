@@ -217,6 +217,8 @@ describe "ActiveRecord Adapter" do
       it "sfsdf" do 
         User.create(name: "ALF")
         binding.pry
+        #expect{User.create(name: "ALF")}.to be be_an_instance_of User
+        #expect(User.joins(:posts)).to be "queue"
       end
     end
 

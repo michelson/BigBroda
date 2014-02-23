@@ -53,7 +53,6 @@ module ActiveRecord
       #else
       #  raise error
       #end
-      #binding.pry
     end
   end
 
@@ -81,13 +80,13 @@ module ActiveRecord
                           }
                         ]}
 
-      GoogleBigquery::TableData.create(ActiveRecord::Base.connection_config[:project], 
+      result = GoogleBigquery::TableData.create(ActiveRecord::Base.connection_config[:project], 
         ActiveRecord::Base.connection_config[:database], 
         self.class.table_name , 
         @rows )
 
-      #binding.pry
-
+      raise result["error"]["errors"].map{|o| "[#{o['domain']}]: #{o['reason']} #{o['message']}" }.join(", ") if result["error"].present?
+      # here we output the IN MEMORY id , because of the BQ latency
       #new_id =  #self.class.unscoped.insert attributes_values
       self.id = new_id #||= new_id if self.class.primary_key
 
@@ -100,6 +99,27 @@ module ActiveRecord
       raise Error::NotImplementedFeature
     end
 
+  end
+
+  # = Active Record Quering
+  module Querying
+    def find_by_sql(sql, binds = [])
+      cfg = ActiveRecord::Base.connection_config
+      result_set = connection.select_all(sanitize_sql(sql), "#{name} Load", binds)
+      column_types = {}
+
+      if result_set.respond_to? :column_types
+        column_types = result_set.column_types
+      else
+        ActiveSupport::Deprecation.warn "the object returned from `select_all` must respond to `column_types`"
+      end
+      # When AR BigQuery queries uses joins , the fields appear as [database.table].field , 
+      # so at least whe clean the class columns to initialize the record propperly
+      #"whoa1393194159_users_id".gsub(/#{@config[:database]}_#{self.table_name}_/, "")
+      result_set.instance_variable_set("@columns", result_set.columns.map{|o| o.gsub(/#{cfg[:database]}_#{self.table_name}_/, "") } )
+      
+      result_set.map { |record| instantiate(record, column_types) }
+    end
   end
 
   # = Active Record Relation
@@ -459,8 +479,8 @@ module ActiveRecord
       # DATABASE STATEMENTS ======================================
 
       def explain(arel, binds = [])
-        sql = "EXPLAIN QUERY PLAN #{to_sql(arel, binds)}"
-        ExplainPrettyPrinter.new.pp(exec_query(sql, 'EXPLAIN', binds))
+        #sql = "EXPLAIN QUERY PLAN #{to_sql(arel, binds)}"
+        #ExplainPrettyPrinter.new.pp(exec_query(sql, 'EXPLAIN', binds))
       end
 
       class ExplainPrettyPrinter
@@ -482,18 +502,12 @@ module ActiveRecord
           
           # Don't cache statements if they are not prepared
           if without_prepared_statement?(binds)
-            # "SELECT * FROM [#{@name}.#{@table_name}] LIMIT 1000"
-            #binding.pry
             result = GoogleBigquery::Jobs.query(@config[:project], {"query"=> sql })
-            #binding.pry
-            return [] result["totalRows"].to_i.zero?
-            raise res["error"]["errors"].map{|o| "[#{o['domain']}]: #{o['reason']} #{o['message']}" }.join(", ") if res["error"].present?
-
-            cols    = result["schema"]["fields"].map{|o| o["name"]} #stmt.columns
-            records = result["rows"].map{|o| o["f"].map{|k,v| k["v"]} }
+            raise result["error"]["errors"].map{|o| "[#{o['domain']}]: #{o['reason']} #{o['message']}" }.join(", ") if result["error"].present?
+            cols    = result["schema"]["fields"].map{|o| o["name"] }
+            records = result["totalRows"].to_i.zero? ? [] : result["rows"].map{|o| o["f"].map{|k,v| k["v"]} }
             stmt = records
           else
-            #binding.pry
             cache = @statements[sql] ||= {
               :stmt => @connection.prepare(sql)
             }
