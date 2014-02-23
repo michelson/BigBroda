@@ -171,6 +171,9 @@ module ActiveRecord
     
     class BigqueryColumn < Column
       class << self
+        TRUE_VALUES = [true, 1, '1', 'true', 'TRUE'].to_set
+        FALSE_VALUES = [false, 0, '0','false', 'FALSE'].to_set
+
         def binary_to_string(value)
           if value.encoding != Encoding::ASCII_8BIT
             value = value.force_encoding(Encoding::ASCII_8BIT)
@@ -419,6 +422,14 @@ module ActiveRecord
         else
           super
         end
+      end
+
+      def quoted_true
+        "1"
+      end
+
+      def quoted_false
+        "0"
       end
 
       def type_cast(value, column) # :nodoc:
