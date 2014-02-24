@@ -39,6 +39,23 @@ ActiveRecord connection in plain ruby:
 
 In Rails app you can use the :adapter, :project and :database options in your database.yml or use the stablish connection in specific models.
 
+#### Configure GoogleBigQuery:
+
+    rails g google_bigquery:install
+
+or generate a file in config/initializers/bigquery.rb with the following contents:
+
+```ruby
+GoogleBigquery::Config.setup do |config|
+  config.pass_phrase = ["pass_phrase"]
+  config.key_file    = ["key_file"]
+  config.client_id   = ["client_id"]
+  config.scope       = ["scope"]
+  config.email       = ["email"]
+end
+```
+
+
 #### Quering
 
   The GoogleBigQuery Adapter brings some of the ActiveRecord nicieties out of the box:

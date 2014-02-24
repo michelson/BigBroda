@@ -1,0 +1,11 @@
+
+Hey, Thanks for install BigBroda
+In order to make Google BigQuery work you will need to follow these steps:
+
+   1. register your api access in: google api console at https://code.google.com/apis/console/) and create a server key.
+
+   2. Download the p12 key. and save it in your app ie:. config/keys/xxx.p12
+
+   3. Configure options in config/initializers/bigquery.rb
+
+Enjoy :)
