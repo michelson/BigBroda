@@ -140,16 +140,33 @@ module ActiveRecord
 
   class SchemaMigration < ActiveRecord::Base
     #THIS SHOULD BE A YAML SCHEMA MIGRATION SYSTEM
+    attr_accessor :migration_file_pwd
+
+    def self.schema_migration_hash
+      file = schema_migration_file("r")
+      json = JSON.parse(file.read)
+    end
+
+    def self.schema_migration_file(mode="w+")
+      file_pwd = Dir.pwd + "/db/schema_migrations.json"
+      File.open( file_pwd, mode )
+    end
+
     def self.create_table(limit=nil)
-      unless connection.table_exists?(table_name)
+      @migration_file_pwd = Dir.pwd + "/db/#{table_name}.json"
+      unless File.exists?(@migration_file_pwd)
         puts "SCHEMA MIGRATION HERE"
         version_options = {null: false}
         version_options[:limit] = limit if limit
 
-        connection.create_table(table_name, id: false) do |t|
-          t.column :version, :string, version_options
-        end
-      #  connection.add_index table_name, :version, unique: true, name: index_name
+        #connection.create_table(table_name, id: false) do |t|
+        #  t.column :version, :string, version_options
+        #end
+        binding.pry
+        file = schema_migration_file
+        file.puts({ db:{ table_name.to_sym => [] } }.to_json )
+        file.close
+        #connection.add_index table_name, :version, unique: true, name: index_name
       end
     end
 
@@ -160,6 +177,69 @@ module ActiveRecord
         connection.drop_table(table_name)
       end
     end
+
+    def self.create!(args, *opts)
+      current_data = schema_migration_hash
+      hsh = {:db=>{:schema_migrations => current_data["db"]["schema_migrations"] << args } }
+      schema_migration_file.puts hsh.to_json
+      schema_migration_file.close
+      true
+    end
+
+    def self.all
+      schema_migration_hash["db"]["schema_migrations"]
+    end
+
+    def self.where(args)
+      all.select{|o| o[args.keys.first.to_s] == args.values.first}
+    end
+  end
+
+  class Migrator
+    class << self
+      def get_all_versions
+        SchemaMigration.all.map { |x| x[:version].to_i }.sort
+      end
+
+      def current_version
+        binding.pry
+        sm_table = schema_migrations_table_name
+        if Base.connection.table_exists?(sm_table)
+          get_all_versions.max || 0
+        else
+          0
+        end
+      end
+
+      def needs_migration?
+        binding.pry
+        current_version < last_version
+      end
+
+      def last_version
+         binding.pry
+        last_migration.version
+      end
+
+      def last_migration #:nodoc:
+         binding.pry
+        migrations(migrations_paths).last || NullMigration.new
+      end
+    end
+    private
+
+    def record_version_state_after_migrating(version)
+      if down?
+        migrated.delete(version)
+        binding.pry
+        ActiveRecord::SchemaMigration.where(:version => version.to_s).delete_all
+      else
+        migrated << version
+        binding.pry
+        ActiveRecord::SchemaMigration.create!(:version => version.to_s)
+      end
+    end
+
   end
 
   module ConnectionAdapters
@@ -207,7 +287,6 @@ module ActiveRecord
 
       class ColumnDefinition < ActiveRecord::ConnectionAdapters::ColumnDefinition
         attr_accessor :array
-
       end
 
       class TableDefinition < ActiveRecord::ConnectionAdapters::TableDefinition
@@ -420,10 +499,12 @@ module ActiveRecord
       end
 
       def drop_database(database)
-        #binding.pry
-        tables = GoogleBigquery::Table.list(@config[:project], database)["tables"].map{|o| o["tableReference"]["tableId"]}
-        tables.each do |table_id|
-          GoogleBigquery::Table.delete(@config[:project], database, table_id)
+        tables = GoogleBigquery::Table.list(@config[:project], database)["tables"]
+        unless tables.blank?
+          tables.map!{|o| o["tableReference"]["tableId"]} 
+          tables.each do |table_id|
+            GoogleBigquery::Table.delete(@config[:project], database, table_id)
+          end
         end
         result = GoogleBigquery::Dataset.delete(@config[:project], database )
         return true if result == true
@@ -648,8 +729,6 @@ module ActiveRecord
         res = GoogleBigquery::Table.create(@config[:project], @config[:database], @table_body )
 
         raise res["error"]["errors"].map{|o| "[#{o['domain']}]: #{o['reason']} #{o['message']}" }.join(", ") if res["error"].present?
-        
-        puts "TABLE CREATED: #{res['selfLink']}"
       end
 
       # See also Table for details on all of the various column transformation.
@@ -736,13 +815,15 @@ module ActiveRecord
         sm_table = ActiveRecord::Migrator.schema_migrations_table_name
         rows = {"rows"=> [{"insertId"=> Time.now.to_i.to_s,
                               "json"=> {
-                                "version"=> "sm.version"
+                                "version"=> "#{sm.version}"
                               }}
                           ]}
+        
         GoogleBigquery::TableData.create(@config[:project], @config[:database], sm_table , @rows )
       end
 
       def assume_migrated_upto_version(version, migrations_paths = ActiveRecord::Migrator.migrations_paths)
+        
         migrations_paths = Array(migrations_paths)
         version = version.to_i
         sm_table = quote_table_name(ActiveRecord::Migrator.schema_migrations_table_name)
