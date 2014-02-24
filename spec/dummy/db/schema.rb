@@ -19,6 +19,7 @@ ActiveRecord::Schema.define(version: 0) do
     t.integer   "phone"
     t.timestamp "created_at"
     t.timestamp "updated_at"
+    t.string    "last_name"
   end
 
 end

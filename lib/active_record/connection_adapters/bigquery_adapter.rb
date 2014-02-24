@@ -76,7 +76,7 @@ module ActiveRecord
         self.class.table_name , 
         @rows )
 
-      raise result["error"]["errors"].map{|o| "[#{o['domain']}]: #{o['reason']} #{o['message']}" }.join(", ") if result["error"].present?
+      #raise result["error"]["errors"].map{|o| "[#{o['domain']}]: #{o['reason']} #{o['message']}" }.join(", ") if result["error"].present?
       #here we output the IN MEMORY id , because of the BQ latency
       self.id = new_id #||= new_id if self.class.primary_key
 
@@ -415,14 +415,19 @@ module ActiveRecord
       def create_database(database)
         result = GoogleBigquery::Dataset.create(@config[:project], 
           {"datasetReference"=> { "datasetId" => database }} )
-        raise result["error"]["errors"].map{|o| "[#{o['domain']}]: #{o['reason']} #{o['message']}" }.join(", ") if result["error"].present?
+        #raise result["error"]["errors"].map{|o| "[#{o['domain']}]: #{o['reason']} #{o['message']}" }.join(", ") if result["error"].present?
         result
       end
 
       def drop_database(database)
+        #binding.pry
+        tables = GoogleBigquery::Table.list(@config[:project], database)["tables"].map{|o| o["tableReference"]["tableId"]}
+        tables.each do |table_id|
+          GoogleBigquery::Table.delete(@config[:project], database, table_id)
+        end
         result = GoogleBigquery::Dataset.delete(@config[:project], database )
         return true if result == true
-        raise result["error"]["errors"].map{|o| "[#{o['domain']}]: #{o['reason']} #{o['message']}" }.join(", ") if result["error"].present?
+        #raise result["error"]["errors"].map{|o| "[#{o['domain']}]: #{o['reason']} #{o['message']}" }.join(", ") if result["error"].present?
         result
       end
 
@@ -507,7 +512,7 @@ module ActiveRecord
           # Don't cache statements if they are not prepared
           if without_prepared_statement?(binds)
             result = GoogleBigquery::Jobs.query(@config[:project], {"query"=> sql })
-            raise result["error"]["errors"].map{|o| "[#{o['domain']}]: #{o['reason']} #{o['message']}" }.join(", ") if result["error"].present?
+            #raise result["error"]["errors"].map{|o| "[#{o['domain']}]: #{o['reason']} #{o['message']}" }.join(", ") if result["error"].present?
             cols    = result["schema"]["fields"].map{|o| o["name"] }
             records = result["totalRows"].to_i.zero? ? [] : result["rows"].map{|o| o["f"].map{|k,v| k["v"]} }
             stmt = records
@@ -735,6 +740,32 @@ module ActiveRecord
                               }}
                           ]}
         GoogleBigquery::TableData.create(@config[:project], @config[:database], sm_table , @rows )
+      end
+
+      def assume_migrated_upto_version(version, migrations_paths = ActiveRecord::Migrator.migrations_paths)
+        migrations_paths = Array(migrations_paths)
+        version = version.to_i
+        sm_table = quote_table_name(ActiveRecord::Migrator.schema_migrations_table_name)
+
+        migrated = select_values("SELECT version FROM #{sm_table}").map { |v| v.to_i }
+        paths = migrations_paths.map {|p| "#{p}/[0-9]*_*.rb" }
+        versions = Dir[*paths].map do |filename|
+          filename.split('/').last.split('_').first.to_i
+        end
+
+        unless migrated.include?(version)
+          execute "INSERT INTO #{sm_table} (version) VALUES ('#{version}')"
+        end
+
+        inserted = Set.new
+        (versions - migrated).each do |v|
+          if inserted.include?(v)
+            raise "Duplicate migration #{v}. Please renumber your migrations to resolve the conflict."
+          elsif v < version
+            execute "INSERT INTO #{sm_table} (version) VALUES ('#{v}')"
+            inserted << v
+          end
+        end
       end
 
 
