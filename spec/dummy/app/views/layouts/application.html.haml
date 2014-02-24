@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+%html
+  %head
+    %title Dummy
+    = stylesheet_link_tag    "application", :media => "all"
+    = javascript_include_tag "application"
+    = csrf_meta_tags
+
+  %body
+
+    .navbar.navbar-inverse.navbar-fixed-top
+      .navbar-inner
+        %a.brand{:href => "#"} Postablr
+        %ul.nav
+          %li.active
+            %a{:href => "/"} Home
+          - if user_signed_in?
+            %li
+              = link_to "Entries" , entries_path
+            %li
+              = link_to "Blog" , blog_path
+        %ul.nav.pull-right
+          %li= link_to "Sign In", "/users/sign_in"
+          %li= link_to "Sign Up", "/users/sign_up"
+          %li= link_to "Log out", "/users/sign_out", :method=>:delete
+
+    .container-fluid
+      .row-fluid
+        .span12{:style=>"margin-top:40px"}
+          / Body content
+          = manage_entries_menu if user_signed_in?
+          = yield

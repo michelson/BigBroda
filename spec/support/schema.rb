@@ -1,7 +1,10 @@
 require 'active_record'
 require 'logger'
 
-ActiveRecord::Base.establish_connection(:adapter => 'bigquery', :database => ':memory:')
+ActiveRecord::Base.establish_connection(
+  :adapter => 'bigquery', 
+  :database => ':memory:'
+)
 #ActiveRecord::Base.logger = Logger.new(SPEC_ROOT.join('debug.log'))
 ActiveRecord::Migration.verbose = false
 

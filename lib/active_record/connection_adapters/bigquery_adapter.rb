@@ -2,11 +2,7 @@ require 'active_record/connection_adapters/abstract_adapter'
 require 'active_record/connection_adapters/statement_pool'
 require 'arel/visitors/bind_visitor'
 
-#gem 'sqlite3', '~> 1.3.6'
-#require 'sqlite3'
-
 module ActiveRecord
-
 
   module Error
     class Standard < StandardError; end
@@ -20,6 +16,12 @@ module ActiveRecord
         "Google big query doesn't allow this column operation"
       end
     end
+
+    class PendingFeature < Standard
+      def message 
+        "Sorry, this is a pending feature, it will be implemented soon."
+      end
+    end
   end
 
   module ConnectionHandling # :nodoc:
@@ -30,19 +32,9 @@ module ActiveRecord
       unless config[:database]
         raise ArgumentError, "No database file specified. Missing argument: database"
       end
+      db = GoogleBigquery::Auth.authorized? ? GoogleBigquery::Auth.client : GoogleBigquery::Auth.new.authorize
+      #db #quizas deberia ser auth.api o auth.client
 
-      auth = GoogleBigquery::Auth.new
-      auth.authorize
-      db = auth
-      #db = GoogleBigquery::Dataset.get(
-      #  config[:project], 
-      #  config[:database]
-      #) 
-
-      #SQLite3::Database.new(
-      #  config[:database].to_s,
-      #  :results_as_hash => true
-      #)
       #db.busy_timeout(ConnectionAdapters::SQLite3Adapter.type_cast_config_to_integer(config[:timeout])) if config[:timeout]
       ConnectionAdapters::BigqueryAdapter.new(db, logger, config)
     rescue  => e
@@ -73,12 +65,11 @@ module ActiveRecord
 
       row_hash = Hash[ [attribute_names, attributes_values.map{|o| o.last}].transpose ]
       new_id =  SecureRandom.hex
-      @rows =   {"rows"=> [
-                          {
+      @rows =   {"rows"=> [{
                             "insertId"=> Time.now.to_i.to_s,
                             "json"=> row_hash.merge("id"=> new_id)
-                          }
-                        ]}
+                          }]
+                }
 
       result = GoogleBigquery::TableData.create(ActiveRecord::Base.connection_config[:project], 
         ActiveRecord::Base.connection_config[:database], 
@@ -86,8 +77,7 @@ module ActiveRecord
         @rows )
 
       raise result["error"]["errors"].map{|o| "[#{o['domain']}]: #{o['reason']} #{o['message']}" }.join(", ") if result["error"].present?
-      # here we output the IN MEMORY id , because of the BQ latency
-      #new_id =  #self.class.unscoped.insert attributes_values
+      #here we output the IN MEMORY id , because of the BQ latency
       self.id = new_id #||= new_id if self.class.primary_key
 
       @new_record = false
@@ -98,7 +88,6 @@ module ActiveRecord
     def update_record(attribute_names = @attributes.keys)
       raise Error::NotImplementedFeature
     end
-
   end
 
   # = Active Record Quering
@@ -150,24 +139,25 @@ module ActiveRecord
   end
 
   class SchemaMigration < ActiveRecord::Base
-
+    #THIS SHOULD BE A YAML SCHEMA MIGRATION SYSTEM
     def self.create_table(limit=nil)
       unless connection.table_exists?(table_name)
         puts "SCHEMA MIGRATION HERE"
-      #  version_options = {null: false}
-      #  version_options[:limit] = limit if limit
+        version_options = {null: false}
+        version_options[:limit] = limit if limit
 
-      #  connection.create_table(table_name, id: false) do |t|
-      #    t.column :version, :string, version_options
-      #  end
+        connection.create_table(table_name, id: false) do |t|
+          t.column :version, :string, version_options
+        end
       #  connection.add_index table_name, :version, unique: true, name: index_name
       end
     end
+
     def self.drop_table
       if connection.table_exists?(table_name)
         puts "SCHEMA MIGRATION DROP"
         #connection.remove_index table_name, name: index_name
-        #connection.drop_table(table_name)
+        connection.drop_table(table_name)
       end
     end
   end
@@ -422,6 +412,20 @@ module ActiveRecord
         false
       end
 
+      def create_database(database)
+        result = GoogleBigquery::Dataset.create(@config[:project], 
+          {"datasetReference"=> { "datasetId" => database }} )
+        raise result["error"]["errors"].map{|o| "[#{o['domain']}]: #{o['reason']} #{o['message']}" }.join(", ") if result["error"].present?
+        result
+      end
+
+      def drop_database(database)
+        result = GoogleBigquery::Dataset.delete(@config[:project], database )
+        return true if result == true
+        raise result["error"]["errors"].map{|o| "[#{o['domain']}]: #{o['reason']} #{o['message']}" }.join(", ") if result["error"].present?
+        result
+      end
+
       # QUOTING ==================================================
 
       def quote(value, column = nil)
@@ -658,8 +662,7 @@ module ActiveRecord
       # Example:
       #   rename_table('octopuses', 'octopi')
       def rename_table(table_name, new_name)
-        exec_query "ALTER TABLE #{quote_table_name(table_name)} RENAME TO #{quote_table_name(new_name)}"
-        rename_table_indexes(table_name, new_name)
+        raise Error::PendingFeature
       end
 
       # See: http://www.sqlite.org/lang_altertable.html
@@ -722,6 +725,16 @@ module ActiveRecord
 
       def drop_table(table_name)
         GoogleBigquery::Table.delete(@config[:project], @config[:database], table_name )
+      end
+
+      def dump_schema_information #:nodoc:
+        sm_table = ActiveRecord::Migrator.schema_migrations_table_name
+        rows = {"rows"=> [{"insertId"=> Time.now.to_i.to_s,
+                              "json"=> {
+                                "version"=> "sm.version"
+                              }}
+                          ]}
+        GoogleBigquery::TableData.create(@config[:project], @config[:database], sm_table , @rows )
       end
 
 

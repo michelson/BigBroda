@@ -78,7 +78,7 @@ see more at: https://developers.google.com/bigquery/query-reference#joins
   @user.save
 ```
 
-NOTE: by default the adapter will set Id values as an SecureRandom.hex 
+NOTE: by default the adapter will set Id values as an SecureRandom.hex, and for now all the foreign keys are created as a STRING type 
 
 #### Deletion and edition of single rows:
 
@@ -320,8 +320,9 @@ GoogleBigquery::TableData.list(@project, @dataset_id, @table_name)
  
 #TODO:
 
-activerecord:
-  +associations
-  + AR schema migration table
-  + AR migration copy tables to update it
+ActiveRecord:
+  + Test HBTM HMT Associations
+  + Generate AR schema migration records OR a YAML SCHEMA MIGRATION
+  + AR migration copy tables to update it (copy to gs:// , delete table, import table from gs://)
   + AR migrate record type
+  + Make id and foreign keys types and values configurable

@@ -1,7 +1,6 @@
 module GoogleBigquery
   class Client
 
-    #CLIENT_OPTIONS = %w(api_method parameters ids start_date end_date dimensions metrics sort filters)
     attr_accessor :options, :api, :client
 
     def initialize(opts = {})
@@ -20,21 +19,6 @@ module GoogleBigquery
 
     def defaults_options(opts)
 
-      #api_method = opts[:api_method] ||= @api.analytics.data.ga.get
-      #start_date = opts[:start_date] ||= DateTime.now.prev_month.strftime("%Y-%m-%d")
-      #end_date   = opts[:end_date]   ||= DateTime.now.strftime("%Y-%m-%d")
-      #ids        = opts[:ids]        ||= "ga:#{GoogleBigquery::Config.profile_id}"
-      #dimensions = opts[:dimensions] ||= "ga:day,ga:month"
-      #metrics    = opts[:metrics]    ||= "ga:visits"
-      #sort       = opts[:sort]       ||= "ga:month,ga:day"
-
-      #self.api_method(api_method)
-      #self.parameters({'ids' => ids,
-      #                'start-date' => start_date,
-      #                'end-date' => end_date,
-      #                'dimensions' => dimensions,
-      #                'metrics' => metrics,
-      #                'sort' => sort })
     end
 
     def parse_response(res)

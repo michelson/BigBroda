@@ -17,3 +17,9 @@ test/version_tmp
 tmp
 spec/fixtures/configs/account_config.yml
 spec/fixtures/keys/
+
+spec/dummy/db/*.sqlite3
+spec/dummy/db/*.sqlite3-journal
+spec/dummy/log/*.log
+spec/dummy/tmp/
+spec/dummy/.sass-cache

@@ -18,6 +18,10 @@ module GoogleBigquery
       self.class.client = @client
     end
 
+    def self.authorized?
+      client.present?
+    end
+
   end
 end
 

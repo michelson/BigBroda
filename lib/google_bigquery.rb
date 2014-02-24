@@ -16,8 +16,12 @@ module GoogleBigquery
   autoload  :Jobs,     'google_bigquery/jobs.rb'
 
   if defined?(::Rails::Railtie)
-    autoload  :Railtie, 'google_bigquery/railtie.rb'
     autoload  :Rails,   'google_bigquery/engine.rb' if ::Rails.version >= '3.1'
+  end
+
+  if defined?(::Rails::Railtie)
+    autoload  :Rails,   'google_bigquery/engine.rb' if ::Rails.version >= '3.1'
+    require File.join(File.dirname(__FILE__), *%w[google_bigquery railtie]) if ::Rails.version.to_s >= '3.1'
   end
 
 end
