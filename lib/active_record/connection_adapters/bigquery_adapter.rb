@@ -34,6 +34,10 @@ module ActiveRecord
       end
       db = GoogleBigquery::Auth.authorized? ? GoogleBigquery::Auth.client : GoogleBigquery::Auth.new.authorize
       #db #quizas deberia ser auth.api o auth.client
+      
+      #In case we are using a bigquery adapter as standard config in database.yml 
+      #All models are BigQuery enabled
+      ActiveRecord::Base.send :include, ActiveRecord::BigQueryPersistence
 
       #db.busy_timeout(ConnectionAdapters::SQLite3Adapter.type_cast_config_to_integer(config[:timeout])) if config[:timeout]
       ConnectionAdapters::BigqueryAdapter.new(db, logger, config)
@@ -48,8 +52,21 @@ module ActiveRecord
     end
   end
 
+  module BQConnector
+    extend ActiveSupport::Concern
+    module ClassMethods
+      def establish_bq_connection(path)
+        self.send :include, ActiveRecord::BigQueryPersistence
+        establish_connection path
+      end
+    end
+  end
+
+  ActiveRecord::Base.send :include, BQConnector
+
+
   # = Active Record Persistence
-  module Persistence
+  module BigQueryPersistence
     extend ActiveSupport::Concern
 
     def delete
@@ -59,20 +76,23 @@ module ActiveRecord
     private
     # Creates a record with values matching those of the instance attributes
     # and returns its id.
-    def create_record(attribute_names = @attributes.keys)
+    def create_record(attribute_names = @attributes.keys)  
+      #binding.pry
+      record_timestamps_hardcoded
+      attributes_values = self.changes.values.map(&:last)
       
-      attributes_values = arel_attributes_with_values_for_create(attribute_names)
-
-      row_hash = Hash[ [attribute_names, attributes_values.map{|o| o.last}].transpose ]
+      #binding.pry
+      
+      row_hash = Hash[ [ self.changes.keys, attributes_values ].transpose ]
       new_id =  SecureRandom.hex
       @rows =   {"rows"=> [{
                             "insertId"=> Time.now.to_i.to_s,
                             "json"=> row_hash.merge("id"=> new_id)
                           }]
                 }
-
-      result = GoogleBigquery::TableData.create(ActiveRecord::Base.connection_config[:project], 
-        ActiveRecord::Base.connection_config[:database], 
+      conn_cfg = self.class.connection_config
+      result = GoogleBigquery::TableData.create(conn_cfg[:project], 
+        conn_cfg[:database], 
         self.class.table_name , 
         @rows )
 
@@ -82,6 +102,19 @@ module ActiveRecord
 
       @new_record = false
       id
+    end
+
+    #Partially copied from activerecord::Timezones
+    def record_timestamps_hardcoded
+      if self.record_timestamps
+        current_time = current_time_from_proper_timezone
+
+        all_timestamp_attributes.each do |column|
+          if respond_to?(column) && respond_to?("#{column}=") && self.send(column).nil?
+            write_attribute(column.to_s, current_time)
+          end
+        end
+      end
     end
 
     # DISABLED FEATURE, Google Big query is append only by design.
@@ -270,21 +303,7 @@ module ActiveRecord
 
   module ConnectionAdapters
 
-    #STRING, INTEGER, FLOAT, BOOLEAN, TIMESTAMP or RECORD
-    NATIVE_DATABASE_TYPES = {
-      primary_key: "STRING",
-      string:      { name: "STRING" },
-      text:        { name: "STRING" },
-      integer:     { name: "INTEGER" },
-      float:       { name: "FLOAT" },
-      decimal:     { name: "INTEGER" },
-      datetime:    { name: "TIMESTAMP" },
-      timestamp:   { name: "TIMESTAMP" },
-      boolean:     { name: "BOOLEAN" },
-      uuid:        { name: "STRING" },
-      json:        { name: "RECORD" },
-    }
-    
+
     class BigqueryColumn < Column
       class << self
         TRUE_VALUES = [true, 1, '1', 'true', 'TRUE'].to_set
@@ -298,6 +317,8 @@ module ActiveRecord
         end
 
         def string_to_time(string)
+          #binding.pry
+          #puts string
           return string unless string.is_a?(String)
           return nil if string.empty?
           fast_string_to_time(string) || fallback_string_to_time(string) || Time.at(string.to_f).send(Base.default_timezone)
@@ -307,9 +328,9 @@ module ActiveRecord
     
     class BigqueryAdapter < AbstractAdapter
       
+
       class Version
       end
-
 
       class ColumnDefinition < ActiveRecord::ConnectionAdapters::ColumnDefinition
         attr_accessor :array
@@ -583,6 +604,7 @@ module ActiveRecord
       end
 
       def type_cast(value, column) # :nodoc:
+        #binding.pry
         return value.to_f if BigDecimal === value
         return super unless String === value
         return super unless column && value
@@ -633,9 +655,9 @@ module ActiveRecord
             stmt = cache[:stmt]
             cols = cache[:cols] ||= stmt.columns
             #stmt.reset!
-            #stmt.bind_params binds.map { |col, val|
-            #  type_cast(val, col)
-            #}
+            stmt.bind_params binds.map { |col, val|
+              type_cast(val, col)
+            }
           end
 
           ActiveRecord::Result.new(cols, stmt)
@@ -696,7 +718,7 @@ module ActiveRecord
       # Returns an array of +SQLite3Column+ objects for the table specified by +table_name+.
       def columns(table_name) #:nodoc:
         schema = GoogleBigquery::Table.get(@config[:project], @config[:database], table_name)
-
+        #binding.pry
         schema["schema"]["fields"].map do |field|
           mode = field['mode'].present? && field['mode'] == "REQUIRED" ? false : true
           #column expects (name, default, sql_type = nil, null = true)
@@ -925,6 +947,8 @@ module ActiveRecord
         end
 
     end
+
+
     
   end
 

@@ -36,7 +36,33 @@ ActiveRecord connection in plain ruby:
     )
 ```
 
-In Rails app you can use the :adapter, :project and :database options in your database.yml or use the stablish connection in specific models.
+In Rails app you can use the :adapter, :project and :database options in your database.yml or use the ```establish_bq_connection(bq_connection)``` connection in specific models.
+
+```yaml
+development:
+  adapter: sqlite3
+  database: db/development.sqlite3
+  pool: 5
+
+bigquery:
+  database: "dummy_dev"
+  adapter: 'bigquery'
+  project: 123456
+  #database: "dummy_test"
+```
+
+By default if you set the development/production/test BD configuration as a bigquery connection all models are Bigquery, migrations and rake:db operations too.
+
+If you don't want to make the all your models BigQuery you can set up and activeRecord model this way:
+
+```ruby
+class UserLog < ActiveRecord::Base
+  establish_bq_connection "bigquery"
+end
+```
+
+
+
 
 #### Configure GoogleBigQuery:
 
