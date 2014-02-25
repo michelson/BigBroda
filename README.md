@@ -1,25 +1,24 @@
 # GoogleBigquery
 
-Big query client built on top of google api client.
+Big query client built on top of google api client with ActiveRecord adapter.
 
 https://developers.google.com/bigquery/what-is-bigquery
 
 
+## Use Cases:
+
+So, BigQuery is fantastic for running ad hoc aggregate queries across a very very large dataset - large web logs, ad analysis, sensor data, sales data... etc. Basically, many kinds of "full table scan"queries. Queries are written in a SQL-style language (you don't have to write custom MapReduce functions). 
+
+But!, Bigquery has a constraint to consider before diving in, 
+BQ is append only , that means that you can't update records or delete them.
+
+So , think BQ as a storage + query service, not your default RDBMS.
+
 ## Installation
 
-Add this line to your application's Gemfile:
-
-    gem 'google_bigquery'
-
-And then execute:
-
-    $ bundle
-
-Or install it yourself as:
+Add 'google_bigquery' to your application's Gemfile or install it yourself as:
 
     $ gem install google_bigquery
-
-# Usage:
 
 ## Rails / ActiveRecord:
 
