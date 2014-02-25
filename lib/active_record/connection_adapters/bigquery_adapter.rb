@@ -140,26 +140,132 @@ module ActiveRecord
 
   class SchemaMigration < ActiveRecord::Base
     #THIS SHOULD BE A YAML SCHEMA MIGRATION SYSTEM
+    attr_accessor :migration_file_pwd
+
+    def self.schema_migration_hash
+      file = schema_migration_file("r")
+      json = JSON.parse(file.read)
+    end
+
+    def self.schema_migration_path
+      Dir.pwd + "/db/schema_migrations.json"
+    end
+
+    def self.schema_migration_file(mode="w+")
+      file_pwd = Dir.pwd + "/db/schema_migrations.json"
+      File.open( file_pwd, mode )
+    end
+
     def self.create_table(limit=nil)
-      unless connection.table_exists?(table_name)
+      @migration_file_pwd = Dir.pwd + "/db/schema_migrations.json"
+      unless File.exists?(@migration_file_pwd)
         puts "SCHEMA MIGRATION HERE"
         version_options = {null: false}
         version_options[:limit] = limit if limit
 
-        connection.create_table(table_name, id: false) do |t|
-          t.column :version, :string, version_options
-        end
-      #  connection.add_index table_name, :version, unique: true, name: index_name
+        #connection.create_table(table_name, id: false) do |t|
+        #  t.column :version, :string, version_options
+        #end
+        file = schema_migration_file
+        file.puts({ db:{ table_name.to_sym => [] } }.to_json )
+        file.close
+        #connection.add_index table_name, :version, unique: true, name: index_name
       end
     end
 
-    def self.drop_table
-      if connection.table_exists?(table_name)
-        puts "SCHEMA MIGRATION DROP"
-        #connection.remove_index table_name, name: index_name
-        connection.drop_table(table_name)
+    #def self.drop_table
+    #  binding.pry
+    #  File.delete(schema_migration_path)
+    #end
+
+    def self.delete_version(options)
+      #versions = ActiveRecord::SchemaMigration.where(:version => version.to_s)
+      version = options[:version]
+      new_data = SchemaMigration.schema_migration_hash["db"]["schema_migrations"].delete_if{|o| o["version"] == version.to_s}
+      hsh = {:db=>{:schema_migrations => new_data } }
+      f = schema_migration_file
+      f.puts hsh.to_json
+      f.close
+    end
+
+    def self.create!(args, *opts)
+      current_data = schema_migration_hash
+      unless schema_migration_hash["db"]["schema_migrations"].map{|o| o["version"]}.include?(args[:version].to_s)
+        hsh = {:db=>{:schema_migrations => current_data["db"]["schema_migrations"] << args } }
+        f = schema_migration_file
+        f.puts hsh.to_json
+        f.close
+      end
+      true
+    end
+
+    def self.all
+      schema_migration_hash["db"]["schema_migrations"]
+    end
+
+    def self.where(args)
+      all.select{|o| o[args.keys.first.to_s] == args.values.first}
+    end
+  end
+
+  class Migrator
+    class << self
+      def get_all_versions
+        SchemaMigration.all.map { |x| x["version"].to_i }.sort
+      end
+
+      def current_version
+        sm_table = schema_migrations_table_name
+        migration_file_pwd = Dir.pwd + "/db/schema_migrations.json"
+
+        if File.exists?(migration_file_pwd)
+          get_all_versions.max || 0
+        else
+          0
+        end
+      end
+
+      def needs_migration?
+        current_version < last_version
+      end
+
+      def last_version
+        get_all_versions.min.to_i
+        #last_migration.version
+      end
+
+      def last_migration #:nodoc:
+        migrations(migrations_paths).last || NullMigration.new
       end
     end
+
+    def current_version
+      migrated.max || 0
+    end
+
+    def current_migration
+      migrations.detect { |m| m["version"] == current_version }
+    end
+
+    def migrated
+      @migrated_versions ||= Set.new(self.class.get_all_versions)
+    end
+
+    alias :current :current_migration
+
+    private
+
+    def record_version_state_after_migrating(version)
+
+      if down?
+        migrated.delete(version)
+        ActiveRecord::SchemaMigration.delete_version(:version => version.to_s)
+      else
+        migrated << version
+        ActiveRecord::SchemaMigration.create!(:version => version.to_s)
+      end
+    end
+
   end
 
   module ConnectionAdapters
@@ -207,7 +313,6 @@ module ActiveRecord
 
       class ColumnDefinition < ActiveRecord::ConnectionAdapters::ColumnDefinition
         attr_accessor :array
-
       end
 
       class TableDefinition < ActiveRecord::ConnectionAdapters::TableDefinition
@@ -420,13 +525,18 @@ module ActiveRecord
       end
 
       def drop_database(database)
-        #binding.pry
-        tables = GoogleBigquery::Table.list(@config[:project], database)["tables"].map{|o| o["tableReference"]["tableId"]}
-        tables.each do |table_id|
-          GoogleBigquery::Table.delete(@config[:project], database, table_id)
+        tables = GoogleBigquery::Table.list(@config[:project], database)["tables"]
+        unless tables.blank?
+          tables.map!{|o| o["tableReference"]["tableId"]} 
+          tables.each do |table_id|
+            GoogleBigquery::Table.delete(@config[:project], database, table_id)
+          end
         end
         result = GoogleBigquery::Dataset.delete(@config[:project], database )
-        return true if result == true
+         if result == true
+            File.delete(SchemaMigration.schema_migration_path) rescue ""
+            return true
+          end
         #raise result["error"]["errors"].map{|o| "[#{o['domain']}]: #{o['reason']} #{o['message']}" }.join(", ") if result["error"].present?
         result
       end
@@ -648,8 +758,6 @@ module ActiveRecord
         res = GoogleBigquery::Table.create(@config[:project], @config[:database], @table_body )
 
         raise res["error"]["errors"].map{|o| "[#{o['domain']}]: #{o['reason']} #{o['message']}" }.join(", ") if res["error"].present?
-        
-        puts "TABLE CREATED: #{res['selfLink']}"
       end
 
       # See also Table for details on all of the various column transformation.
@@ -693,31 +801,40 @@ module ActiveRecord
             "description"=> "added from migration"} )
         
         else
-          raise Error::NotImplementedFeature
+          bypass_feature
           #alter_table(table_name) do |definition|
           #  definition.column(column_name, type, options)
           #end
         end
       end
 
+      def bypass_feature
+        begin
+          raise Error::NotImplementedColumnOperation
+        rescue => e
+          puts e.message
+          logger.warn(e.message)
+        end
+      end
+
       def remove_column(table_name, column_name, type = nil, options = {}) #:nodoc: 
-        raise Error::NotImplementedColumnOperation
+        bypass_feature
       end
 
       def change_column_default(table_name, column_name, default) #:nodoc:
-        raise Error::NotImplementedColumnOperation
+        bypass_feature
       end
 
       def change_column_null(table_name, column_name, null, default = nil)
-        raise Error::NotImplementedColumnOperation
+        bypass_feature
       end
 
       def change_column(table_name, column_name, type, options = {}) #:nodoc:
-        raise Error::NotImplementedColumnOperation
+        bypass_feature
       end
 
       def rename_column(table_name, column_name, new_column_name) #:nodoc:
-        raise Error::NotImplementedColumnOperation
+        bypass_feature
       end
 
       def add_reference(table_name, ref_name, options = {})
@@ -736,13 +853,15 @@ module ActiveRecord
         sm_table = ActiveRecord::Migrator.schema_migrations_table_name
         rows = {"rows"=> [{"insertId"=> Time.now.to_i.to_s,
                               "json"=> {
-                                "version"=> "sm.version"
+                                "version"=> "#{sm.version}"
                               }}
                           ]}
+        
         GoogleBigquery::TableData.create(@config[:project], @config[:database], sm_table , @rows )
       end
 
       def assume_migrated_upto_version(version, migrations_paths = ActiveRecord::Migrator.migrations_paths)
+        binding.pry
         migrations_paths = Array(migrations_paths)
         version = version.to_i
         sm_table = quote_table_name(ActiveRecord::Migrator.schema_migrations_table_name)
