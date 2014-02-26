@@ -54,19 +54,24 @@ module GoogleBigquery
     end
 
     def self.delete(project_id, dataset_id, body={})
+
+      tables = GoogleBigquery::Table.list(project_id, dataset_id)["tables"]
+      
+      unless tables.nil? or tables.empty?
+        tables.map!{|o| o["tableReference"]["tableId"]} 
+        tables.each do |table_id|
+          GoogleBigquery::Table.delete(project_id, dataset_id, table_id)
+        end
+      end
+
       res = GoogleBigquery::Auth.client.execute(
         :api_method=> GoogleBigquery::Auth.api.datasets.delete, 
         #:body_object=> {"deleteContents"=> true}, 
         :parameters=> {"projectId"=> project_id, "datasetId" => dataset_id }
       )
-       res.status == 204 ?  true : parse_response(res)
+      res.status == 204 ?  true : parse_response(res)
+
     end
 
   end
 end
-#Path parameters
-#projectId   string  Project ID of the datasets to be listed
-#Optional query parameters
-#all   boolean   Whether to list all datasets, including hidden ones
-#maxResults  unsigned integer  The maximum number of results to return
-#pageToken   string  Page token, returned by a previous call, to request the next page of results 

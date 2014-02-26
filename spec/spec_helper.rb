@@ -6,7 +6,20 @@ require 'stringio'
 require "pry"
 require "certified"
 
+require 'vcr'
+
+
 RSpec.configure do |config|
+
+  #config.treat_symbols_as_metadata_keys_with_true_values = true
+
+  VCR.configure do |c|
+    c.cassette_library_dir = 'spec/fixtures/vcr_cassettes'
+    c.hook_into :webmock
+    c.allow_http_connections_when_no_cassette = true
+    c.configure_rspec_metadata!
+  end
+
 
   def fixture_key(type, filename)
     dir_name = type.to_s + "s"

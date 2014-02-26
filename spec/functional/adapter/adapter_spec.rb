@@ -127,12 +127,12 @@ describe "ActiveRecord Adapter" do
       end
 
       it "creation" do 
-        binding.pry
+        #binding.pry
       end
 
       it "simple quering" do
-        sleep 50
-        binding.pry
+        #sleep 50
+        #binding.pry
         #User.select("name, id").where("name contains ?", "frank").count
         #User.select("name, id").where("name contains ?", "frank")
         #User.select("name, id")
@@ -216,7 +216,7 @@ describe "ActiveRecord Adapter" do
 
       it "sfsdf" do 
         User.create(name: "ALF")
-        binding.pry
+        #binding.pry
         #expect{User.create(name: "ALF")}.to be be_an_instance_of User
         #expect(User.joins(:posts)).to be "queue"
       end

@@ -1,0 +1,135 @@
+---
+http_interactions:
+- request:
+    method: post
+    uri: https://www.googleapis.com/bigquery/v2/projects/985884699512/datasets
+    body:
+      encoding: UTF-8
+      string: '{"datasetReference":{"datasetId":"rspec_schema"}}'
+    headers:
+      User-Agent:
+      - |-
+        google-api-ruby-client/0.7.1 Mac OS X/10.9
+         (gzip)
+      Content-Type:
+      - application/json
+      Accept-Encoding:
+      - gzip
+      Authorization:
+      - Bearer ya29.1.AADtN_XJM9N6TvCqSO_Tyzw6Xs7SpUsJTsKOIJXyDSAexNWIlCiUztVt7AgSVGSE
+      Cache-Control:
+      - no-store
+      Accept:
+      - '*/*'
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Cache-Control:
+      - no-cache, no-store, max-age=0, must-revalidate
+      Pragma:
+      - no-cache
+      Expires:
+      - Fri, 01 Jan 1990 00:00:00 GMT
+      Date:
+      - Wed, 26 Feb 2014 03:09:26 GMT
+      Etag:
+      - '"YElLezYfBS2yoouJ_U61l1GQsXY/l9-wseQzc2SuHrePbfEVHiWbl9M"'
+      Content-Type:
+      - application/json; charset=UTF-8
+      Content-Encoding:
+      - gzip
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - 1; mode=block
+      Content-Length:
+      - '387'
+      Server:
+      - GSE
+      Alternate-Protocol:
+      - 443:quic
+    body:
+      encoding: ASCII-8BIT
+      string: !binary |-
+        H4sIAAAAAAAAAI2RXU/CMBSG7/crlnor1AFOxpUSF8WoyPxAIsaU7mxWyjrb
+        jgWM/922QRO/orfnfc/zno8Xz0dzVqSo56MZy58rkKutlGiiQKNtI4ImuRWn
+        aBLzU1hPsv5layVEdfJwHQY8OBqp2wnmUaNWMFrT1mV1LOFilsU3x2w849HZ
+        FDkOcxEkZxwac6ah0Yn2elKVQB8UfYQFcS4FPDtlxdx6H7UuVQ/juq6buRA5
+        B1Iy1aRigd8nxcsWLqV4AqoV/szGmyUU/hayURLIQEJBwYS9eP5HfeAm/drl
+        o03Q4IdFkOe/WjKhFJQy+p1psEzDEdwGoCQ+OIwTRzJrGjYj/EiKqrTiBp0A
+        SUEqQ3O4L4RxMrj6izCWZqJfCcPx+V+AYV38r79SIPureEEYt1LU3e12O2EU
+        7Qat/RSWwEUJspkb15JRMIcRVaHt8xzb8+/tvagEopkortjCBQTtqN3udoIw
+        3AlC9ytOlD4TKcsYpD+7vFfvDbsZhzrFAgAA
+    http_version: 
+  recorded_at: Wed, 26 Feb 2014 03:09:26 GMT
+- request:
+    method: post
+    uri: https://www.googleapis.com/bigquery/v2/projects/985884699512/datasets/rspec_schema/tables
+    body:
+      encoding: UTF-8
+      string: '{"tableReference":{"projectId":"985884699512","datasetId":"rspec_schema","tableId":"users"},"schema":[{"fields":[{"name":"name","type":"string","mode":"REQUIRED"},{"name":"age","type":"integer"},{"name":"weight","type":"float"},{"name":"is_magic","type":"boolean"}]}]}'
+    headers:
+      User-Agent:
+      - |-
+        google-api-ruby-client/0.7.1 Mac OS X/10.9
+         (gzip)
+      Content-Type:
+      - application/json
+      Accept-Encoding:
+      - gzip
+      Authorization:
+      - Bearer ya29.1.AADtN_XJM9N6TvCqSO_Tyzw6Xs7SpUsJTsKOIJXyDSAexNWIlCiUztVt7AgSVGSE
+      Cache-Control:
+      - no-store
+      Accept:
+      - '*/*'
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Cache-Control:
+      - no-cache, no-store, max-age=0, must-revalidate
+      Pragma:
+      - no-cache
+      Expires:
+      - Fri, 01 Jan 1990 00:00:00 GMT
+      Date:
+      - Wed, 26 Feb 2014 03:09:27 GMT
+      Etag:
+      - '"YElLezYfBS2yoouJ_U61l1GQsXY/sDxxYncQ5CpMscZ1AHghKZKwT5o"'
+      Content-Type:
+      - application/json; charset=UTF-8
+      Content-Encoding:
+      - gzip
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - 1; mode=block
+      Content-Length:
+      - '393'
+      Server:
+      - GSE
+      Alternate-Protocol:
+      - 443:quic
+    body:
+      encoding: ASCII-8BIT
+      string: !binary |-
+        H4sIAAAAAAAAAHWR3VLCMBCF7/sUnXiLxIqgcIdaEUEYSpkRf4aJ6VIibVOb
+        YEWHdzdNYESEm2by7Z5zNttvy0ZzlgSoYaNXFr4vIFseSfIaASqpEkgSFqVn
+        NHajLnyNp5fD0yXni7vJqOZETmsgHsZYXH9+jhM6qF6l94I+Os3bcNZ57OR+
+        lT8j7cN0AAlZBMdzJuH4rH7eyEQKdCLoDGJSXgjIhO4VEE27LJkXipmUqWhg
+        nOd5OeQ8jICkTJQpj/FmWvxxitOMvwGVAv9NwAGRRIDi21FYP0/g30QNPJhC
+        BgkFlftt2TZam7b3jF6obLR2Nw3bCaasXU3RRFn2Sr/P9KxTpgyiQKjbk7pp
+        pGBC4mIMc5YMk8tUs6HvtXutDY15oKnnDkZtz71GBV6V9niR8J9Vu+e7Ldc7
+        rMmBhTO5K7vp9pv+YRETk1iti+7KLvv9rtvsGaH6vKz3QTMgkvHEZ0bvVOqV
+        ysWZUzs/qdb0/4mIkPc8YGpXwf4ua2X9ADufrTXKAgAA
+    http_version: 
+  recorded_at: Wed, 26 Feb 2014 03:09:27 GMT
+recorded_with: VCR 2.8.0

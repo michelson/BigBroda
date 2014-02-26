@@ -7,10 +7,12 @@ describe "Config" do
   end
 
   it "authorization object" do
-    @auth.authorize
-    @auth.api.class.should be Google::APIClient::API
-    GoogleBigquery::Auth.api.class.should be Google::APIClient::API
-    GoogleBigquery::Auth.client.class.should be Google::APIClient
+    VCR.use_cassette('auth') do
+      @auth.authorize
+      @auth.api.class.should be Google::APIClient::API
+      GoogleBigquery::Auth.api.class.should be Google::APIClient::API
+      GoogleBigquery::Auth.client.class.should be Google::APIClient
+    end
   end
 
 end

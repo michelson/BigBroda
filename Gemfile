@@ -10,4 +10,6 @@ gem "pry"
 gem 'pry-remote'
 gem 'pry-nav'
 gem 'sqlite3'
+gem 'vcr'
+gem 'webmock', '1.16.0'
 

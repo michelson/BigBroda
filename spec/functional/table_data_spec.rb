@@ -2,18 +2,21 @@
 
 require File.expand_path(File.dirname(__FILE__) + '../../spec_helper')
 
-describe "Dataset" do
+describe "TableData", :vcr => { :allow_unused_http_interactions => true } do
   before(:all) do
-    config_setup
-    @auth = GoogleBigquery::Auth.new
-    @auth.authorize
-    @project = config_options["email"].match(/(\d*)/)[0]
+    VCR.use_cassette("TableData/authorize_config") do
+      config_setup
+      @auth = GoogleBigquery::Auth.new
+      @auth.authorize
+      @project = config_options["email"].match(/(\d*)/)[0]
+    end
   end
 
   before :each do 
-    @name = "whoa#{Time.now.to_i}"
-    GoogleBigquery::Dataset.create(@project, {"datasetReference"=> { "datasetId" => @name }} )["id"]  
-        @table_name =  "table#{Time.now.to_i}"
+    @name = "rspec_schema"
+    VCR.use_cassette("TableData/create_each", :record => :new_episodes) do
+      GoogleBigquery::Dataset.create(@project, {"datasetReference"=> { "datasetId" => @name }} )["id"]  
+        @table_name =  "users"
         @table_body = {  "tableReference"=> {
                             "projectId"=> @project,
                             "datasetId"=> @name,
@@ -26,7 +29,7 @@ describe "Dataset" do
                                       ]
                           ]
               }
-    @table = GoogleBigquery::Table.create(@project, @name, @table_body )
+      @table = GoogleBigquery::Table.create(@project, @name, @table_body )
   
       @rows =   {"rows"=> [
                             {
@@ -36,18 +39,22 @@ describe "Dataset" do
                               }
                             }
                           ]}
+    end
   end
 
   after(:each) do 
-    GoogleBigquery::Table.delete(@project, @name, @table_name )
-    GoogleBigquery::Dataset.delete(@project, @name) 
+    VCR.use_cassette("TableData/delete_each") do
+      GoogleBigquery::Dataset.delete(@project, @name) 
+    end
   end
 
   it "insertAll" do 
-    GoogleBigquery::TableData.create(@project, @name, @table_name , @rows )
-    sleep 30
-    expect(GoogleBigquery::Jobs.query(@project, {"query"=> "SELECT * FROM [#{@name}.#{@table_name}] LIMIT 1000" })["rows"].empty?).to be false
-    expect(GoogleBigquery::TableData.list(@project, @name, @table_name)["rows"].empty?).to be false
+    VCR.use_cassette("TableData/insertAll2", :record => :new_episodes) do
+      GoogleBigquery::TableData.create(@project, @name, @table_name , @rows )
+      #sleep 60
+      expect(GoogleBigquery::Jobs.query(@project, {"query"=> "SELECT * FROM [#{@name}.#{@table_name}] LIMIT 1000" })["rows"].empty?).to be false
+      expect(GoogleBigquery::TableData.list(@project, @name, @table_name)["rows"].empty?).to be false
+    end
   end
 
 

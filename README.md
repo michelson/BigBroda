@@ -1,5 +1,7 @@
 # GoogleBigquery
 
+GoogleBig Query ActiveRecord Adapter & API client
+
 Big query client built on top of google api client with ActiveRecord adapter.
 
 https://developers.google.com/bigquery/what-is-bigquery
@@ -53,7 +55,7 @@ bigquery:
 
 By default if you set the development/production/test BD configuration as a bigquery connection all models are Bigquery, migrations and rake:db operations too.
 
-If you don't want to make the all your models BigQuery you can set up and activeRecord model this way:
+If you don't want to make all your models BigQuery you can set up specific BQ activeRecord models this way:
 
 ```ruby
 class UserLog < ActiveRecord::Base

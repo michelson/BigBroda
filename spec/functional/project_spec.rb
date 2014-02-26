@@ -1,17 +1,21 @@
 require File.expand_path(File.dirname(__FILE__) + '../../spec_helper')
 
-describe "Project" do
+describe "Project", :vcr => { :allow_unused_http_interactions => true } do
+  
   before(:all) do
-    config_setup
-    @auth = GoogleBigquery::Auth.new
-    @auth.authorize
-    @project = config_options["email"].match(/(\d*)/)[0]
-  end
-  before :each do 
-    @name = "whoa#{Time.now.to_i}"
+    VCR.use_cassette("Project/authorize_config") do
+      config_setup
+      @auth = GoogleBigquery::Auth.new
+      @auth.authorize
+      @project = config_options["email"].match(/(\d*)/)[0]
+    end
   end
 
-  it ".list" do
+  before :each do 
+    @name = "rspec_schema"
+  end
+
+  it ".list", :vcr do
     expect(
       GoogleBigquery::Project.list["projects"].class
     ).to be Array

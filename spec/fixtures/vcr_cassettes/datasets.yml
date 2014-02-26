@@ -1,0 +1,119 @@
+---
+http_interactions:
+- request:
+    method: post
+    uri: https://www.googleapis.com/bigquery/v2/projects/985884699512/datasets
+    body:
+      encoding: UTF-8
+      string: '{"datasetReference":{"datasetId":"rspec-schema"}}'
+    headers:
+      User-Agent:
+      - |-
+        google-api-ruby-client/0.7.1 Mac OS X/10.9
+         (gzip)
+      Content-Type:
+      - application/json
+      Accept-Encoding:
+      - gzip
+      Authorization:
+      - Bearer ya29.1.AADtN_Wg4Sg29lGgLuTYiuQYm942Z0_LCwqQ9Jg0OS4RVbh8wzOygJS7_Pe-1y7K
+      Cache-Control:
+      - no-store
+      Accept:
+      - '*/*'
+  response:
+    status:
+      code: 400
+      message: Bad Request
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Content-Encoding:
+      - gzip
+      Date:
+      - Wed, 26 Feb 2014 00:34:44 GMT
+      Expires:
+      - Wed, 26 Feb 2014 00:34:44 GMT
+      Cache-Control:
+      - private, max-age=0
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - 1; mode=block
+      Content-Length:
+      - '198'
+      Server:
+      - GSE
+      Alternate-Protocol:
+      - 443:quic
+    body:
+      encoding: ASCII-8BIT
+      string: !binary |-
+        H4sIAAAAAAAAAM2OOw6DQAxEe05hbZVICSIRVWoazhBSmF0LkPaD7CUN4u5Z
+        IJ8rpLE8b6Z4cwaKmAOrG8wZvIOkdE9pQwma4HDwCarOhhatOu2cCSVsfPBP
+        tIP5FI5EsKO1qfcGDEYUilBX0CiWkfRZdE8OG5VD9S0F3CQRWgK0Y49+csSD
+        hsNoJ4HJG2LRgUmOgN78thFcSO+luJage2TUMS3BBt/lanVa0nmsdkoHs4qV
+        RbHFf1NdsiV7AbxkedaWAQAA
+    http_version: 
+  recorded_at: Wed, 26 Feb 2014 00:34:44 GMT
+- request:
+    method: delete
+    uri: https://www.googleapis.com/bigquery/v2/projects/985884699512/datasets/rspec-schema
+    body:
+      encoding: UTF-8
+      string: ''
+    headers:
+      User-Agent:
+      - |-
+        google-api-ruby-client/0.7.1 Mac OS X/10.9
+         (gzip)
+      Accept-Encoding:
+      - gzip
+      Content-Type:
+      - ''
+      Authorization:
+      - Bearer ya29.1.AADtN_Wg4Sg29lGgLuTYiuQYm942Z0_LCwqQ9Jg0OS4RVbh8wzOygJS7_Pe-1y7K
+      Cache-Control:
+      - no-store
+      Accept:
+      - '*/*'
+  response:
+    status:
+      code: 400
+      message: Bad Request
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Content-Encoding:
+      - gzip
+      Date:
+      - Wed, 26 Feb 2014 00:34:45 GMT
+      Expires:
+      - Wed, 26 Feb 2014 00:34:45 GMT
+      Cache-Control:
+      - private, max-age=0
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - 1; mode=block
+      Content-Length:
+      - '198'
+      Server:
+      - GSE
+      Alternate-Protocol:
+      - 443:quic
+    body:
+      encoding: ASCII-8BIT
+      string: !binary |-
+        H4sIAAAAAAAAAM2OOw6DQAxEe05hbZVICSIRVWoazhBSmF0LkPaD7CUN4u5Z
+        IJ8rpLE8b6Z4cwaKmAOrG8wZvIOkdE9pQwma4HDwCarOhhatOu2cCSVsfPBP
+        tIP5FI5EsKO1qfcGDEYUilBX0CiWkfRZdE8OG5VD9S0F3CQRWgK0Y49+csSD
+        hsNoJ4HJG2LRgUmOgN78thFcSO+luJage2TUMS3BBt/lanVa0nmsdkoHs4qV
+        RbHFf1NdsiV7AbxkedaWAQAA
+    http_version: 
+  recorded_at: Wed, 26 Feb 2014 00:34:45 GMT
+recorded_with: VCR 2.8.0

@@ -43,8 +43,7 @@ module GoogleBigquery
 
     def self.raise_detected_errors(res)
       body = JSON.parse(res.body)
-      raise body["error"]["errors"].map{|o| "[BigQuery: #{o['domain']}]: #{o['reason']} #{o['message']}" }.join(", ") if body["error"].present?
-      #raise body["error"]["errors"].collect{|e| "#{e["reason"]}: #{e["message"]}" }.join(", ") if body.keys.include?("error")
+      raise body["error"]["errors"].map{|o| "[BigQuery: #{o['domain']}]: #{o['reason']} #{o['message']}" }.join(", ") if body.has_key?("error")
     end
 
   end
