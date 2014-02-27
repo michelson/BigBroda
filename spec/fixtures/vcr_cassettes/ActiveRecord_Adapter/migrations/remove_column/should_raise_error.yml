@@ -1,0 +1,713 @@
+---
+http_interactions:
+- request:
+    method: post
+    uri: https://www.googleapis.com/bigquery/v2/projects/985884699512/datasets
+    body:
+      encoding: UTF-8
+      string: '{"datasetReference":{"datasetId":"rspec_schema"}}'
+    headers:
+      User-Agent:
+      - |-
+        google-api-ruby-client/0.7.1 Mac OS X/10.9
+         (gzip)
+      Content-Type:
+      - application/json
+      Accept-Encoding:
+      - gzip
+      Authorization:
+      - Bearer ya29.1.AADtN_XhqguaqxV0pr8U9vF1JIHDrYQIKxWqFK1XJc6HFECUC39WsFei8BrCOGLS
+      Cache-Control:
+      - no-store
+      Accept:
+      - '*/*'
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Cache-Control:
+      - no-cache, no-store, max-age=0, must-revalidate
+      Pragma:
+      - no-cache
+      Expires:
+      - Fri, 01 Jan 1990 00:00:00 GMT
+      Date:
+      - Thu, 27 Feb 2014 01:15:25 GMT
+      Etag:
+      - '"YElLezYfBS2yoouJ_U61l1GQsXY/kCoxg94-jdolE8FRY130Xf_0FLA"'
+      Content-Type:
+      - application/json; charset=UTF-8
+      Content-Encoding:
+      - gzip
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - 1; mode=block
+      Content-Length:
+      - '388'
+      Server:
+      - GSE
+      Alternate-Protocol:
+      - 443:quic
+    body:
+      encoding: ASCII-8BIT
+      string: !binary |-
+        H4sIAAAAAAAAAI2R20/CMBTG3/dXLPVVKINxGU/ehsGgxqkBoobU7mxUyjrb
+        DkTj/27boIm36Ov5vvP7zuXF89GCFSnq++ie5Y8VyM1OSjRRoNGuEUGT3Iq3
+        aBrzETxPs4PL5kaI6mR23Ql4cHyhJlO8OBRPeRTWHlLB494gmQatxiSbNQaj
+        /VvkOMxFkJxxqC2YhloYdftSlUBnis5hSZxLAc9GrFhY71zrUvUxXq/X9VyI
+        nAMpmapTscTvk+JVE5dSPADVCn9m4+0SCn8L2SoJZCChoGDCXjz/oz50k37t
+        8tE2aPjDIsjzXy2ZUApKGf3GNFim4QhuA1AS7x/FiSOZNQ2bEX4sRVVacYtO
+        gKQglaE53BfCOBle/UUYSzPRr4Tz8dlfgPN18b/+SoE82MRLwriVol671ws7
+        UdQOmnsprICLEmQ9N64Vo2AOI6pC2+c5tuff2XtRCUQzUVyxpQsIWlEr7LS6
+        zTBqR+5XnCh9KlKWMUh/dnmv3hsVsyZKxQIAAA==
+    http_version: 
+  recorded_at: Thu, 27 Feb 2014 01:15:25 GMT
+- request:
+    method: post
+    uri: https://www.googleapis.com/bigquery/v2/projects/985884699512/datasets/rspec_schema/tables
+    body:
+      encoding: UTF-8
+      string: '{"tableReference":{"projectId":"985884699512","datasetId":"rspec_schema","tableId":"users"},"schema":[{"fields":[{"name":"id","type":"string"},{"name":"name","type":"string","mode":"REQUIRED"},{"name":"age","type":"integer"},{"name":"weight","type":"float"},{"name":"is_magic","type":"boolean"}]}]}'
+    headers:
+      User-Agent:
+      - |-
+        google-api-ruby-client/0.7.1 Mac OS X/10.9
+         (gzip)
+      Content-Type:
+      - application/json
+      Accept-Encoding:
+      - gzip
+      Authorization:
+      - Bearer ya29.1.AADtN_XhqguaqxV0pr8U9vF1JIHDrYQIKxWqFK1XJc6HFECUC39WsFei8BrCOGLS
+      Cache-Control:
+      - no-store
+      Accept:
+      - '*/*'
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Cache-Control:
+      - no-cache, no-store, max-age=0, must-revalidate
+      Pragma:
+      - no-cache
+      Expires:
+      - Fri, 01 Jan 1990 00:00:00 GMT
+      Date:
+      - Thu, 27 Feb 2014 01:15:26 GMT
+      Etag:
+      - '"YElLezYfBS2yoouJ_U61l1GQsXY/VlpQS_hCGqX4t1vb6BE2E_3uWaA"'
+      Content-Type:
+      - application/json; charset=UTF-8
+      Content-Encoding:
+      - gzip
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - 1; mode=block
+      Content-Length:
+      - '397'
+      Server:
+      - GSE
+      Alternate-Protocol:
+      - 443:quic
+    body:
+      encoding: ASCII-8BIT
+      string: !binary |-
+        H4sIAAAAAAAAAHWRUU/CMBSF3/crlvoKlAHBwBvoJBiEMEAhYpayXUalW8da
+        IEj473bdjIjwsqbn3u+c27ujYaI1jXzUNNGCBpstJIc7SRYMUEGVQJIgLc3R
+        zGY9+Jot26PKgfPtszupW8zqDMV0hl9ZPBy5q4fOZlqT1m5Rb9sV261u30hr
+        jrQP1QEkoAyKayqhWGvcNxMRg+cKbwUhKW0FJEL3CmDLHo3WKbGSMhZNjPf7
+        fSngPGBAYipKHg/xz7R4V8Fxwj/BkwL/TcA+kUSA0s+jsH6ewL+JWnBgCQlE
+        Hqjco2GaKDftXhk9pUyUu2cN5wlZWbtmxSzKME/6fVlPnrKkwHyhbu/qpiUl
+        RiRMx0jXVsgUeYi1Mho73X4HpeKpcIXQ53UmV0Pua9Wxh5OuYz/e9iLBP6tu
+        f2x3bOc2swcarOQl9tQbtMa3ISrcUC3Yu8Tag0HPbvUzUH0+8g16CRBJeTSm
+        GW9VG9VavXpfqZetsv6jjAj5wn2qtutf7zJOxjchapDD/AIAAA==
+    http_version: 
+  recorded_at: Thu, 27 Feb 2014 01:15:26 GMT
+- request:
+    method: post
+    uri: https://www.googleapis.com/bigquery/v2/projects/985884699512/datasets/rspec_schema/tables/users/insertAll
+    body:
+      encoding: UTF-8
+      string: '{"rows":[{"insertId":"1393463726","json":{"name":"User 2014-02-26 22:15:26
+        -0300"}}]}'
+    headers:
+      User-Agent:
+      - |-
+        google-api-ruby-client/0.7.1 Mac OS X/10.9
+         (gzip)
+      Content-Type:
+      - application/json
+      Accept-Encoding:
+      - gzip
+      Authorization:
+      - Bearer ya29.1.AADtN_XhqguaqxV0pr8U9vF1JIHDrYQIKxWqFK1XJc6HFECUC39WsFei8BrCOGLS
+      Cache-Control:
+      - no-store
+      Accept:
+      - '*/*'
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Cache-Control:
+      - no-cache, no-store, max-age=0, must-revalidate
+      Pragma:
+      - no-cache
+      Expires:
+      - Fri, 01 Jan 1990 00:00:00 GMT
+      Date:
+      - Thu, 27 Feb 2014 01:15:27 GMT
+      Etag:
+      - '"YElLezYfBS2yoouJ_U61l1GQsXY/vyGp6PvFo4RvsFtPoIWeCReyIC8"'
+      Content-Type:
+      - application/json; charset=UTF-8
+      Content-Encoding:
+      - gzip
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - 1; mode=block
+      Content-Length:
+      - '69'
+      Server:
+      - GSE
+      Alternate-Protocol:
+      - 443:quic
+    body:
+      encoding: ASCII-8BIT
+      string: !binary |-
+        H4sIAAAAAAAAAKvmUlDKzsxLUbJSUErKTC8sTS2qVC5JTMpJdUksSfTMK04t
+        KnHMyQlKLS7IB3KUuGq5AH1Qqg4zAAAA
+    http_version: 
+  recorded_at: Thu, 27 Feb 2014 01:15:27 GMT
+- request:
+    method: delete
+    uri: https://www.googleapis.com/bigquery/v2/projects/985884699512/datasets/rspec_schema/tables/users
+    body:
+      encoding: UTF-8
+      string: ''
+    headers:
+      User-Agent:
+      - |-
+        google-api-ruby-client/0.7.1 Mac OS X/10.9
+         (gzip)
+      Accept-Encoding:
+      - gzip
+      Content-Type:
+      - ''
+      Authorization:
+      - Bearer ya29.1.AADtN_XhqguaqxV0pr8U9vF1JIHDrYQIKxWqFK1XJc6HFECUC39WsFei8BrCOGLS
+      Cache-Control:
+      - no-store
+      Accept:
+      - '*/*'
+  response:
+    status:
+      code: 204
+      message: No Content
+    headers:
+      Cache-Control:
+      - no-cache, no-store, max-age=0, must-revalidate
+      Pragma:
+      - no-cache
+      Expires:
+      - Fri, 01 Jan 1990 00:00:00 GMT
+      Date:
+      - Thu, 27 Feb 2014 01:15:28 GMT
+      Etag:
+      - '"YElLezYfBS2yoouJ_U61l1GQsXY/vyGp6PvFo4RvsFtPoIWeCReyIC8"'
+      Server:
+      - GSE
+      Alternate-Protocol:
+      - 443:quic
+    body:
+      encoding: UTF-8
+      string: ''
+    http_version: 
+  recorded_at: Thu, 27 Feb 2014 01:15:28 GMT
+- request:
+    method: post
+    uri: https://www.googleapis.com/bigquery/v2/projects/985884699512/datasets/rspec_schema/tables
+    body:
+      encoding: UTF-8
+      string: '{"tableReference":{"projectId":"985884699512","datasetId":"rspec_schema","tableId":"users"},"schema":[{"fields":[{"name":"id","type":"string"},{"name":"name","type":"string"},{"name":"created_at","type":"timestamp"},{"name":"taggable_id","type":"string"},{"name":"taggable_type","type":"string"},{"name":"admin","type":"boolean"},{"name":"updated_at","type":"timestamp"}]}]}'
+    headers:
+      User-Agent:
+      - |-
+        google-api-ruby-client/0.7.1 Mac OS X/10.9
+         (gzip)
+      Content-Type:
+      - application/json
+      Accept-Encoding:
+      - gzip
+      Authorization:
+      - Bearer ya29.1.AADtN_XhqguaqxV0pr8U9vF1JIHDrYQIKxWqFK1XJc6HFECUC39WsFei8BrCOGLS
+      Cache-Control:
+      - no-store
+      Accept:
+      - '*/*'
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Cache-Control:
+      - no-cache, no-store, max-age=0, must-revalidate
+      Pragma:
+      - no-cache
+      Expires:
+      - Fri, 01 Jan 1990 00:00:00 GMT
+      Date:
+      - Thu, 27 Feb 2014 01:15:29 GMT
+      Etag:
+      - '"YElLezYfBS2yoouJ_U61l1GQsXY/uJhIgI1stSUT7KgT-hkcdH5zheQ"'
+      Content-Type:
+      - application/json; charset=UTF-8
+      Content-Encoding:
+      - gzip
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - 1; mode=block
+      Content-Length:
+      - '397'
+      Server:
+      - GSE
+      Alternate-Protocol:
+      - 443:quic
+    body:
+      encoding: ASCII-8BIT
+      string: !binary |-
+        H4sIAAAAAAAAAJWSXU/CMBSG7/crlnoL1PEhgTtICA75EBiJRAwp69lWN7a5
+        dhIg/He7DhUJJHLTpu85z3nPabvXdOSzkKKmjlbM/Ugh2d4JsgoAFWQIBHGz
+        0ALNO0EfdnOnPS1voyjtLWcPRmB0x/xljtOeZ7qmwcV0ZtWfXKvo+TZ9rO08
+        GC+QqsOUAXFZAEWfCShWG/VmwmOwl9z2YE1KKYeEq1wOgdNnoZ8RnhAxb2K8
+        2WxKbhS5AZCY8ZIdrfF3t/izjOMkegdbcPzXAVMiCAepn1phNR7Hv45KmIAD
+        CYQ2SN+9puvoWNS80HpG6ehYPU84dcjDqmoezK00/aDmy3OOLg6DgHJ5epUn
+        JUkxJOusjezaCrkitrFSptbEHHZRJh4KFwi138jYCRABdEnEOWmZg87Uag2e
+        r8Pyg7jZoMvbe/1BFXAjTOiahedQezTqd1rD61Qa0/+NKpe343up62FRaLG8
+        hlFpVKoPlXq5cV+rqf8TEC4GEWXyLenlLO2gfQGCF22NagMAAA==
+    http_version: 
+  recorded_at: Thu, 27 Feb 2014 01:15:29 GMT
+- request:
+    method: get
+    uri: https://www.googleapis.com/bigquery/v2/projects/985884699512/datasets/rspec_schema/tables
+    body:
+      encoding: UTF-8
+      string: ''
+    headers:
+      User-Agent:
+      - |-
+        google-api-ruby-client/0.7.1 Mac OS X/10.9
+         (gzip)
+      Accept-Encoding:
+      - gzip
+      Content-Type:
+      - ''
+      Authorization:
+      - Bearer ya29.1.AADtN_XhqguaqxV0pr8U9vF1JIHDrYQIKxWqFK1XJc6HFECUC39WsFei8BrCOGLS
+      Cache-Control:
+      - no-store
+      Accept:
+      - '*/*'
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Expires:
+      - Thu, 27 Feb 2014 01:15:29 GMT
+      Date:
+      - Thu, 27 Feb 2014 01:15:29 GMT
+      Cache-Control:
+      - private, max-age=0, must-revalidate, no-transform
+      Etag:
+      - '"YElLezYfBS2yoouJ_U61l1GQsXY/XJ719iEz0XHe0cx60bWA1F-zf5Y"'
+      Content-Type:
+      - application/json; charset=UTF-8
+      Content-Encoding:
+      - gzip
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - 1; mode=block
+      Content-Length:
+      - '252'
+      Server:
+      - GSE
+      Alternate-Protocol:
+      - 443:quic
+    body:
+      encoding: ASCII-8BIT
+      string: !binary |-
+        H4sIAAAAAAAAAHWPz0/CMBiG7/0rmnp1uhqFwA2SqZBd/BW3iCFd+TYrhc22
+        S9zI/nfabiYe4NBLn/d9n3wHhMlW7Ddkikkmip8aVHNhWCYhFtqQS4vBsMLh
+        FUkjGUOb5vOXm6Ys6+X6bUQlfXjSSXqdLMd0IqI2TB4h5L+jMHuf0fugze/S
+        FfE7flXbpQ+E8cG+c2aXtlB4xAohIdgKA8HtZDxVugK+1vwLduyq1qD0kPbN
+        Z8hBwZ6DbXoDJpUqv4GbxYmxvonJhhmmYYj8F/wF/HaPe6X77gZvUzkbeZ3N
+        48iBDuFPf25pmFwY2LmTKerQERyoOg1rAQAA
+    http_version: 
+  recorded_at: Thu, 27 Feb 2014 01:15:30 GMT
+- request:
+    method: get
+    uri: https://www.googleapis.com/bigquery/v2/projects/985884699512/datasets/rspec_schema/tables/users
+    body:
+      encoding: UTF-8
+      string: ''
+    headers:
+      User-Agent:
+      - |-
+        google-api-ruby-client/0.7.1 Mac OS X/10.9
+         (gzip)
+      Accept-Encoding:
+      - gzip
+      Content-Type:
+      - ''
+      Authorization:
+      - Bearer ya29.1.AADtN_XhqguaqxV0pr8U9vF1JIHDrYQIKxWqFK1XJc6HFECUC39WsFei8BrCOGLS
+      Cache-Control:
+      - no-store
+      Accept:
+      - '*/*'
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Expires:
+      - Thu, 27 Feb 2014 01:15:31 GMT
+      Date:
+      - Thu, 27 Feb 2014 01:15:31 GMT
+      Cache-Control:
+      - private, max-age=0, must-revalidate, no-transform
+      Etag:
+      - '"YElLezYfBS2yoouJ_U61l1GQsXY/oqwkjz4LgMSKl-aV0j_VPeYvdfA"'
+      Content-Type:
+      - application/json; charset=UTF-8
+      Content-Encoding:
+      - gzip
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - 1; mode=block
+      Content-Length:
+      - '418'
+      Server:
+      - GSE
+      Alternate-Protocol:
+      - 443:quic
+    body:
+      encoding: ASCII-8BIT
+      string: !binary |-
+        H4sIAAAAAAAAAJWSXU/CMBSG7/crlnoLlC8lcAcJIejwA9BI1CxlPZuFbp1r
+        xwKG/27XTUUjidys6XvOc95zevZu2WjNIop6Nlqy4C2FZHumyJIDqugQKBLk
+        oWe0GHIHdgt/MGtuhUgv3fuLBm+M7uTjAou3bL3atZ1gMrviVfJQX7kPt7DY
+        UL//jEwdZgxIwDhU10xBtd3t9BIZg+dK7xVCUkslJNLkSuC+w6J1TrwqFcse
+        xlmW1QIhAg4kZrLmiRB/dos3TRwnYgWekvinA6ZEEQlaP7TCZjyJvx2NMAUf
+        Eog80L7vlm2jsuj4j9ZzykZl9SLh0KEIm6pFsLCy7L2Zr8gpXXwGnEp9e9I3
+        I2kxImHeRv5slUJR29gos/l0fD1Cubiv/EGY80TGS4AooC5Rv8n5eDKczfuT
+        2+Ow/kGCfFD39F6/UAOcCBMasug3NLi5cYb96+NUGtP/jao/L+W+ojQcbBXk
+        O0J1VCpTkR0I5gWZiOassGm0uq32RavT7NbPz00GJ1JNBGV63fR41lcz/YEz
+        RNbe+gBwDYgqnwMAAA==
+    http_version: 
+  recorded_at: Thu, 27 Feb 2014 01:15:32 GMT
+- request:
+    method: get
+    uri: https://www.googleapis.com/bigquery/v2/projects/985884699512/datasets/rspec_schema/tables
+    body:
+      encoding: UTF-8
+      string: ''
+    headers:
+      User-Agent:
+      - |-
+        google-api-ruby-client/0.7.1 Mac OS X/10.9
+         (gzip)
+      Accept-Encoding:
+      - gzip
+      Content-Type:
+      - ''
+      Authorization:
+      - Bearer ya29.1.AADtN_XhqguaqxV0pr8U9vF1JIHDrYQIKxWqFK1XJc6HFECUC39WsFei8BrCOGLS
+      Cache-Control:
+      - no-store
+      Accept:
+      - '*/*'
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Expires:
+      - Thu, 27 Feb 2014 01:15:33 GMT
+      Date:
+      - Thu, 27 Feb 2014 01:15:33 GMT
+      Cache-Control:
+      - private, max-age=0, must-revalidate, no-transform
+      Etag:
+      - '"YElLezYfBS2yoouJ_U61l1GQsXY/XJ719iEz0XHe0cx60bWA1F-zf5Y"'
+      Content-Type:
+      - application/json; charset=UTF-8
+      Content-Encoding:
+      - gzip
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - 1; mode=block
+      Content-Length:
+      - '252'
+      Server:
+      - GSE
+      Alternate-Protocol:
+      - 443:quic
+    body:
+      encoding: ASCII-8BIT
+      string: !binary |-
+        H4sIAAAAAAAAAHWPz0/CMBiG7/0rmnp1uhqFwA2SqZBd/BW3iCFd+TYrhc22
+        S9zI/nfabiYe4NBLn/d9n3wHhMlW7Ddkikkmip8aVHNhWCYhFtqQS4vBsMLh
+        FUkjGUOb5vOXm6Ys6+X6bUQlfXjSSXqdLMd0IqI2TB4h5L+jMHuf0fugze/S
+        FfE7flXbpQ+E8cG+c2aXtlB4xAohIdgKA8HtZDxVugK+1vwLduyq1qD0kPbN
+        Z8hBwZ6DbXoDJpUqv4GbxYmxvonJhhmmYYj8F/wF/HaPe6X77gZvUzkbeZ3N
+        48iBDuFPf25pmFwY2LmTKerQERyoOg1rAQAA
+    http_version: 
+  recorded_at: Thu, 27 Feb 2014 01:15:33 GMT
+- request:
+    method: put
+    uri: https://www.googleapis.com/bigquery/v2/projects/985884699512/datasets/rspec_schema/tables/users
+    body:
+      encoding: UTF-8
+      string: '{"tableReference":{"projectId":"985884699512","datasetId":"rspec_schema","tableId":"users"},"schema":[{"fields":[{"name":"id","type":"string"},{"name":"name","type":"string"},{"name":"created_at","type":"timestamp"},{"name":"taggable_id","type":"string"},{"name":"taggable_type","type":"string"},{"name":"admin","type":"boolean"},{"name":"updated_at","type":"timestamp"},{"name":"published","type":"boolean"}]}],"description":"added
+        from migration"}'
+    headers:
+      User-Agent:
+      - |-
+        google-api-ruby-client/0.7.1 Mac OS X/10.9
+         (gzip)
+      Content-Type:
+      - application/json
+      Accept-Encoding:
+      - gzip
+      Authorization:
+      - Bearer ya29.1.AADtN_XhqguaqxV0pr8U9vF1JIHDrYQIKxWqFK1XJc6HFECUC39WsFei8BrCOGLS
+      Cache-Control:
+      - no-store
+      Accept:
+      - '*/*'
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Cache-Control:
+      - no-cache, no-store, max-age=0, must-revalidate
+      Pragma:
+      - no-cache
+      Expires:
+      - Fri, 01 Jan 1990 00:00:00 GMT
+      Date:
+      - Thu, 27 Feb 2014 01:15:34 GMT
+      Etag:
+      - '"YElLezYfBS2yoouJ_U61l1GQsXY/_PhsnmT7XoUICfvzCejGugSbTso"'
+      Content-Type:
+      - application/json; charset=UTF-8
+      Content-Encoding:
+      - gzip
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - 1; mode=block
+      Content-Length:
+      - '453'
+      Server:
+      - GSE
+      Alternate-Protocol:
+      - 443:quic
+    body:
+      encoding: ASCII-8BIT
+      string: !binary |-
+        H4sIAAAAAAAAAJ1STW/iMBC951dE7pXiAm0R3KBCiBW0XUglUFtFJp4EFyfO
+        2k4RrfjvtZ0sSz84sBdbfjPvvZnxvHs+WrOMoq6Pliz5U4Dcnmmy5IBqJgSa
+        JDb0hBYDPoa3RdyfNbdCFL/Ch+sGbwx/q/kCh/crlaVBey4eRjfx69sNvAyL
+        ZLYMlHhCToc5A5IwDudrpuH8stPuSpVDFKpoBSmpFwqkcrkKeDxm2doyVlrn
+        qovxZrOpJ0IkHEjOVD0SKf5bLX5t4lyKF4i0wp8dMCWaKDD4oRV27Sn8z9EB
+        U4hBQhaB8X33fB9VoqMfSrcsH1XqZcKhQxl2qmWwtPL8nXWjoCLJcs1E5pQp
+        BerHUqR+yhJJHO7mUGpV1cQMOFXm9WheDjJgRlJbrh1vrUT0NnfILJiObofI
+        grvaDwx3n8iJJBANNCT6KzMYTQazoDe5P042i5TYgYSn17qnOsKJZEJTln0l
+        9e/uxoPe7XFWkdP/bzUvlpypFXxr9JOtOZ6rjciKtL/VYH8XXaAKmYrNAeBm
+        bzYjYKVHo9VpXV632s3OxdWVy+BE6YmgzCwKPZ61b6PXHw+Qt/M+AAnymTYB
+        BAAA
+    http_version: 
+  recorded_at: Thu, 27 Feb 2014 01:15:34 GMT
+- request:
+    method: get
+    uri: https://www.googleapis.com/bigquery/v2/projects/985884699512/datasets/rspec_schema/tables
+    body:
+      encoding: UTF-8
+      string: ''
+    headers:
+      User-Agent:
+      - |-
+        google-api-ruby-client/0.7.1 Mac OS X/10.9
+         (gzip)
+      Accept-Encoding:
+      - gzip
+      Content-Type:
+      - ''
+      Authorization:
+      - Bearer ya29.1.AADtN_XhqguaqxV0pr8U9vF1JIHDrYQIKxWqFK1XJc6HFECUC39WsFei8BrCOGLS
+      Cache-Control:
+      - no-store
+      Accept:
+      - '*/*'
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Expires:
+      - Thu, 27 Feb 2014 01:15:35 GMT
+      Date:
+      - Thu, 27 Feb 2014 01:15:35 GMT
+      Cache-Control:
+      - private, max-age=0, must-revalidate, no-transform
+      Etag:
+      - '"YElLezYfBS2yoouJ_U61l1GQsXY/EzvdSNkMI9tIO0ev_B1nMqVFYg0"'
+      Content-Type:
+      - application/json; charset=UTF-8
+      Content-Encoding:
+      - gzip
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - 1; mode=block
+      Content-Length:
+      - '253'
+      Server:
+      - GSE
+      Alternate-Protocol:
+      - 443:quic
+    body:
+      encoding: ASCII-8BIT
+      string: !binary |-
+        H4sIAAAAAAAAAHWPUUvDMBSF3/MrQnx1bhVRtjcLVSqdonNi2aRk7V2Nzdou
+        uR10o//dJK3ggz7kJd855+OeCGWFKDM2o2wj8n0Dqj1DvpEQCY3s3GBAnlu8
+        ZnEgIzjGW39x2VZV85Asrz3p3T/r93gcHA/Z4rGYh1MMnyZwSHyvnO/f7uJ8
+        smZux61qs7QilJ7M+89s0wYKh3guJIwKgTC6mt7MlK4hTXT6CTt+0WhQeki7
+        5gtsQUGZgmk6A2W1qr4gxfCPsb5JWcaRaxgivwU/Abfd415pv7vB29bWxl5v
+        /SiwoCP0w51bIZchws6e7JGOfAPQzz2DawEAAA==
+    http_version: 
+  recorded_at: Thu, 27 Feb 2014 01:15:35 GMT
+- request:
+    method: delete
+    uri: https://www.googleapis.com/bigquery/v2/projects/985884699512/datasets/rspec_schema/tables/users
+    body:
+      encoding: UTF-8
+      string: ''
+    headers:
+      User-Agent:
+      - |-
+        google-api-ruby-client/0.7.1 Mac OS X/10.9
+         (gzip)
+      Accept-Encoding:
+      - gzip
+      Content-Type:
+      - ''
+      Authorization:
+      - Bearer ya29.1.AADtN_XhqguaqxV0pr8U9vF1JIHDrYQIKxWqFK1XJc6HFECUC39WsFei8BrCOGLS
+      Cache-Control:
+      - no-store
+      Accept:
+      - '*/*'
+  response:
+    status:
+      code: 204
+      message: No Content
+    headers:
+      Cache-Control:
+      - no-cache, no-store, max-age=0, must-revalidate
+      Pragma:
+      - no-cache
+      Expires:
+      - Fri, 01 Jan 1990 00:00:00 GMT
+      Date:
+      - Thu, 27 Feb 2014 01:15:36 GMT
+      Etag:
+      - '"YElLezYfBS2yoouJ_U61l1GQsXY/vyGp6PvFo4RvsFtPoIWeCReyIC8"'
+      Server:
+      - GSE
+      Alternate-Protocol:
+      - 443:quic
+    body:
+      encoding: UTF-8
+      string: ''
+    http_version: 
+  recorded_at: Thu, 27 Feb 2014 01:15:36 GMT
+- request:
+    method: delete
+    uri: https://www.googleapis.com/bigquery/v2/projects/985884699512/datasets/rspec_schema
+    body:
+      encoding: UTF-8
+      string: ''
+    headers:
+      User-Agent:
+      - |-
+        google-api-ruby-client/0.7.1 Mac OS X/10.9
+         (gzip)
+      Accept-Encoding:
+      - gzip
+      Content-Type:
+      - ''
+      Authorization:
+      - Bearer ya29.1.AADtN_XhqguaqxV0pr8U9vF1JIHDrYQIKxWqFK1XJc6HFECUC39WsFei8BrCOGLS
+      Cache-Control:
+      - no-store
+      Accept:
+      - '*/*'
+  response:
+    status:
+      code: 204
+      message: No Content
+    headers:
+      Cache-Control:
+      - no-cache, no-store, max-age=0, must-revalidate
+      Pragma:
+      - no-cache
+      Expires:
+      - Fri, 01 Jan 1990 00:00:00 GMT
+      Date:
+      - Thu, 27 Feb 2014 01:15:36 GMT
+      Etag:
+      - '"YElLezYfBS2yoouJ_U61l1GQsXY/vyGp6PvFo4RvsFtPoIWeCReyIC8"'
+      Server:
+      - GSE
+      Alternate-Protocol:
+      - 443:quic
+    body:
+      encoding: UTF-8
+      string: ''
+    http_version: 
+  recorded_at: Thu, 27 Feb 2014 01:15:37 GMT
+recorded_with: VCR 2.8.0

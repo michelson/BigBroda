@@ -413,12 +413,13 @@ module ActiveRecord
                                         self.class.type_cast_config_to_integer(config.fetch(:statement_limit) { 1000 }))
         @config = config
 
-        if self.class.type_cast_config_to_boolean(config.fetch(:prepared_statements) { true })
-          @prepared_statements = true
-          @visitor = Arel::Visitors::SQLite.new self
-        else
-          @visitor = unprepared_visitor
-        end
+        #if self.class.type_cast_config_to_boolean(config.fetch(:prepared_statements) { true })
+        #  @prepared_statements = true
+        #  @visitor = Arel::Visitors::SQLite.new self
+        #else
+        #use the sql without prepraded statements, as I know BQ doesn't support them.
+        @visitor = unprepared_visitor
+       
       end
 
       def adapter_name #:nodoc:
@@ -440,7 +441,7 @@ module ActiveRecord
       # Returns true, since this connection adapter supports prepared statement
       # caching.
       def supports_statement_cache?
-        true
+        false
       end
 
       # Returns true, since this connection adapter supports migrations.
@@ -644,20 +645,12 @@ module ActiveRecord
           # Don't cache statements if they are not prepared
           if without_prepared_statement?(binds)
             result = GoogleBigquery::Jobs.query(@config[:project], {"query"=> sql })
-            #raise result["error"]["errors"].map{|o| "[#{o['domain']}]: #{o['reason']} #{o['message']}" }.join(", ") if result["error"].present?
             cols    = result["schema"]["fields"].map{|o| o["name"] }
             records = result["totalRows"].to_i.zero? ? [] : result["rows"].map{|o| o["f"].map{|k,v| k["v"]} }
             stmt = records
           else
-            cache = @statements[sql] ||= {
-              :stmt => @connection.prepare(sql)
-            }
-            stmt = cache[:stmt]
-            cols = cache[:cols] ||= stmt.columns
-            #stmt.reset!
-            stmt.bind_params binds.map { |col, val|
-              type_cast(val, col)
-            }
+            binding.pry
+            #BQ does not support prepared statements, yiak!
           end
 
           ActiveRecord::Result.new(cols, stmt)

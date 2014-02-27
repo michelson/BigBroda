@@ -3,7 +3,6 @@ require File.expand_path(File.dirname(__FILE__) + '../../../spec_helper')
 require "active_record"
 require "active_record/connection_adapters/bigquery_adapter.rb"
 
-
 class CreateUsers < ActiveRecord::Migration
   def self.up
     create_table :users do |t|
@@ -59,121 +58,109 @@ class Post < ActiveRecord::Base
   belongs_to :user
 end
 
-describe "ActiveRecord Adapter" do
+def create_tables
+  @table = GoogleBigquery::Table.create(@project, @name, @table_body )
+  
+  @rows =   {"rows"=> [
+                        {
+                          "insertId"=> Time.now.to_i.to_s,
+                          "json"=> {
+                            "name"=> "User #{Time.now.to_s}"
+                          }
+                        }
+                      ]}
+                      
+  GoogleBigquery::TableData.create(@project, @name, @table_name , @rows )
+end
+
+describe "ActiveRecord Adapter", :vcr => { :allow_unused_http_interactions => true } do
+
+  let(:migration) { CreateUsers.new}
+  let(:posts_migration) { CreatePosts.new}
+  let(:add_col_migration) { AddPublishedToUser.new}
+  let(:remove_col_migration) { RemovePublishedToUser.new}
 
   before :all do 
-    config_setup
-    @name = "whoa#{Time.now.to_i}"
-    @project = config_options["email"].match(/(\d*)/)[0]
-    
-    @auth = GoogleBigquery::Auth.new
-    @auth.authorize
 
-    @table_name =  "users"
-    @table_body = {  "tableReference"=> {
-                        "projectId"=> @project,
-                        "datasetId"=> @name,
-                        "tableId"=> @table_name}, 
-                      "schema"=> [:fields=>[ 
-                                    {:name=> "id", :type=> "string"},
-                                    {:name=> "name", :type=> "string", :mode => "REQUIRED"},
-                                    {:name=>  "age", :type=> "integer"},
-                                    {:name=> "weight", :type=> "float"},
-                                    {:name=> "is_magic", :type=> "boolean"}
-                                  ]
-                      ]
-                  }
+    VCR.use_cassette("ActiveRecord_Adapter/authorize_config") do
+      config_setup
+      @auth = GoogleBigquery::Auth.new
+      @auth.authorize
+      @name = "rspec_schema"
+      @project = config_options["email"].match(/(\d*)/)[0]
 
-    ActiveRecord::Base.establish_connection(
-      :adapter => 'bigquery', 
-      :project => @project,
-      :database => @name
-    )
+      @table_name =  "users"
+      @table_body = {  "tableReference"=> {
+                          "projectId"=> @project,
+                          "datasetId"=> @name,
+                          "tableId"=> @table_name}, 
+                        "schema"=> [:fields=>[ 
+                                      {:name=> "id", :type=> "string"},
+                                      {:name=> "name", :type=> "string", :mode => "REQUIRED"},
+                                      {:name=>  "age", :type=> "integer"},
+                                      {:name=> "weight", :type=> "float"},
+                                      {:name=> "is_magic", :type=> "boolean"}
+                                    ]
+                        ]
+                    }
+
+      ActiveRecord::Base.establish_connection(
+        :adapter => 'bigquery', 
+        :project => @project,
+        :database => @name
+      )
+    end
   end
 
-  describe "tables queries and creation" do 
-    before :each do 
-      expect(
-        GoogleBigquery::Dataset.create(@project, 
-          {"datasetReference"=> { "datasetId" => @name }} )["id"]
-        ).to include @name
-
-      @table = GoogleBigquery::Table.create(@project, @name, @table_body )
-      
-      @rows =   {"rows"=> [
-                            {
-                              "insertId"=> Time.now.to_i.to_s,
-                              "json"=> {
-                                "id" => "some-id-#{Time.now.to_i.to_s}",
-                                "name"=> "User #{Time.now.to_s}"
-                              }
-                            }
-                          ]}
-                          
-      GoogleBigquery::TableData.create(@project, @name, @table_name , @rows )
-
+  before :each do 
+    VCR.use_cassette("ActiveRecord_Adapter/create_each") do
+      GoogleBigquery::Dataset.create(@project, 
+        {"datasetReference"=> { "datasetId" => @name }} )
+      create_tables     
     end
+  end
 
-    after :each do 
-      GoogleBigquery::Table.delete(@project, @name, @table_name )
+  after :each do 
+    VCR.use_cassette("ActiveRecord_Adapter/after_each") do
       GoogleBigquery::Dataset.delete(@project, @name) 
     end
+  end
 
-    describe "adapter" do 
-      before :each do
-        #User.table_name = "[#{@name}.#{@table_name}]"
-        #User.first
-        #binding.pry
-      end
+  describe "adapter" do 
 
-      it "creation" do 
-        #binding.pry
-      end
-
-      it "simple quering" do
-        #sleep 50
-        #binding.pry
-        #User.select("name, id").where("name contains ?", "frank").count
-        #User.select("name, id").where("name contains ?", "frank")
-        #User.select("name, id")
-        #User.create(name: "frank capra")
-        #User.find_by(id: "some-id-1393025921")
-        #User.where("id =? and name= ?", "some-id-1393025921", "User 2014-02-21 20:38:41 -0300")
-        expect(User.count).to be 1
-        expect(User.first).to be_an_instance_of User
-        expect(User.all.size).to be 1
-      end
+    it "simple quering", :vcr do
+      #sleep 50
+      #binding.pry
+      #User.select("name, id").where("name contains ?", "frank").count
+      #User.select("name, id").where("name contains ?", "frank")
+      #User.select("name, id")
+      #User.create(name: "frank capra")
+      #User.find_by(id: "some-id-1393025921")
+      #User.where("id =? and name= ?", "some-id-1393025921", "User 2014-02-21 20:38:41 -0300")
+      expect(User.count).to be 1
+      expect(User.first).to be_an_instance_of User
+      expect(User.all.size).to be 1
     end
   end
 
   describe "migrations" do
-
-    let(:dataset){
-      GoogleBigquery::Dataset.create(@project, 
-            {"datasetReference"=> { "datasetId" => @name }} )
-    }
-
-    let(:migration) { CreateUsers.new}
-    let(:posts_migration) { CreatePosts.new}
-    let(:add_col_migration) { AddPublishedToUser.new}
-    let(:remove_col_migration) { RemovePublishedToUser.new}
-   
-    describe '#up' do
-      before { 
-        expect(dataset["id"]).to include @name
+    
+    before :each do 
+      VCR.use_cassette("ActiveRecord_Adapter/after_each") do
+        GoogleBigquery::Table.delete(@project, @name, "users") 
         migration.up; User.reset_column_information 
-      }
-     
-      it 'adds the email_at_utc_hour column' do
+      end
+    end
+   
+    describe '#up', vcr: {:record => :new_episodes} do     
+      it 'adds the created_at & updated_at column', :vcr do
         User.columns_hash.should have_key('created_at')
         User.columns_hash.should have_key('updated_at')
       end
     end
 
-    describe '#down' do
+    describe '#down', vcr: {:record => :new_episodes} do
       before { 
-        expect(dataset["id"]).to include @name
-        migration.up; User.reset_column_information 
         migration.down; User.reset_column_information 
       }
      
@@ -183,22 +170,19 @@ describe "ActiveRecord Adapter" do
 
     end
 
-    describe "add column" do 
-      before { 
-        expect(dataset["id"]).to include @name
-        migration.up; User.reset_column_information 
-        add_col_migration.change; User.reset_column_information 
-      }
+    #describe "add column", vcr: {:record => :new_episodes} do 
+    #  before { 
+    #    add_col_migration.change; User.reset_column_information 
+    #  }
      
-      it 'adds published column' do
-        User.columns_hash.should have_key('published')
-      end
-    end
+    #  it 'adds published column' do
+    #    #binding.pry
+    #    User.columns_hash.should have_key('published')
+    #  end
+    #end
 
-    describe "remove column" do 
+    describe "remove column", vcr: {:record => :new_episodes} do 
       before { 
-        expect(dataset["id"]).to include @name
-        migration.up; User.reset_column_information 
         add_col_migration.change; User.reset_column_information 
       }
      
@@ -207,22 +191,22 @@ describe "ActiveRecord Adapter" do
       end
     end
 
-    describe "associations" do 
+    describe "associations", vcr: {:record => :new_episodes} do 
       before { 
-        expect(dataset["id"]).to include @name
-        migration.up; User.reset_column_information 
         posts_migration.up; Post.reset_column_information 
       }
 
-      it "sfsdf" do 
+      it "users_posts" do 
         User.create(name: "ALF")
-        #binding.pry
-        #expect{User.create(name: "ALF")}.to be be_an_instance_of User
-        #expect(User.joins(:posts)).to be "queue"
+        #sleep 50
+        post = User.first.posts.create(title: "yeah")
+        #sleep 50
+        expect(User.first).to respond_to(:id)
+        expect(User.first.posts.first).to be_an_instance_of Post
+        expect(User.joins(:posts).first.posts.count).to be 1
       end
+
     end
-
-
 
   end
 
