@@ -1,3 +1,3 @@
 class LogData < ActiveRecord::Base
-    establish_connection "bigquery"
+  establish_connection "bigquery"
 end
