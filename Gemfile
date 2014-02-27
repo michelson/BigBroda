@@ -5,11 +5,14 @@ gemspec
 
 gem "certified"
 gem "debugger"
-gem "rspec"
 gem "pry"
 gem 'pry-remote'
 gem 'pry-nav'
 gem 'sqlite3'
-gem 'vcr'
-gem 'webmock', '1.16.0'
+
+group :test do
+  gem "rspec"
+  gem 'vcr'
+  gem 'webmock', '1.16.0'
+end
 
