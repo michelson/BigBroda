@@ -13,6 +13,6 @@ gem 'sqlite3'
 group :test do
   gem "rspec"
   gem 'vcr'
-  gem 'webmock', '1.16.0'
+  gem 'webmock', '1.16.0', require: false
 end
 

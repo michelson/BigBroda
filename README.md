@@ -2,19 +2,16 @@
 
 GoogleBig Query ActiveRecord Adapter & API client
 
-Big query client built on top of google api client with ActiveRecord adapter.
+## Use Cases:
 
 https://developers.google.com/bigquery/what-is-bigquery
 
-
-## Use Cases:
-
-So, BigQuery is fantastic for running ad hoc aggregate queries across a very very large dataset - large web logs, ad analysis, sensor data, sales data... etc. Basically, many kinds of "full table scan"queries. Queries are written in a SQL-style language (you don't have to write custom MapReduce functions). 
+BigQuery is fantastic for running ad hoc aggregate queries across a very very large dataset - large web logs, ad analysis, sensor data, sales data... etc. Basically, many kinds of "full table scan" queries. Queries are written in a SQL-style language (you don't have to write custom MapReduce functions). 
 
 But!, Bigquery has a constraint to consider before diving in, 
 BQ is append only , that means that you can't update records or delete them.
 
-So , think BQ as a storage + query service, not your default RDBMS.
+So, use BigQuery as an OLAP (Online Analytical Processing) service, not as OLTP (Online Transactional Processing). In other words, use BigQuery as a DataWareHouse.
 
 ## Installation
 
@@ -24,6 +21,22 @@ Add 'google_bigquery' to your application's Gemfile or install it yourself as:
 
 ## Rails / ActiveRecord:
 
+#### Configure GoogleBigQuery:
+
+    rails g google_bigquery:install
+
+Or generate a file in config/initializers/bigquery.rb with the following contents:
+
+```ruby
+GoogleBigquery::Config.setup do |config|
+  config.pass_phrase = ["pass_phrase"]
+  config.key_file    = ["key_file"]
+  config.client_id   = ["client_id"]
+  config.scope       = ["scope"]
+  config.email       = ["email"]
+end
+```
+
 ### Active Record Adapter
 
 #### Connection
@@ -31,11 +44,11 @@ Add 'google_bigquery' to your application's Gemfile or install it yourself as:
 ActiveRecord connection in plain ruby:
 
 ```ruby
-    ActiveRecord::Base.establish_connection(
-      :adapter => 'bigquery', 
-      :project => "MyBigQueryProject",
-      :database => "MyBigTable"
-    )
+ActiveRecord::Base.establish_connection(
+  :adapter => 'bigquery', 
+  :project => "MyBigQueryProject",
+  :database => "MyBigTable"
+)
 ```
 
 In Rails app you can use the :adapter, :project and :database options in your database.yml or use the ```establish_bq_connection(bq_connection)``` connection in specific models.
@@ -53,7 +66,7 @@ bigquery:
   #database: "dummy_test"
 ```
 
-By default if you set the development/production/test BD configuration as a bigquery connection all models are Bigquery, migrations and rake:db operations too.
+By default if you set the development/production/test BD configuration as a bigquery connection all models are Bigquery, migrations and rake:db operations use the BigQuery migration system.
 
 If you don't want to make all your models BigQuery you can set up specific BQ activeRecord models this way:
 
@@ -63,25 +76,16 @@ class UserLog < ActiveRecord::Base
 end
 ```
 
-
-
-
-#### Configure GoogleBigQuery:
-
-    rails g google_bigquery:install
-
-or generate a file in config/initializers/bigquery.rb with the following contents:
+Then you will have to execute the migration programaticly. like this:
 
 ```ruby
-GoogleBigquery::Config.setup do |config|
-  config.pass_phrase = ["pass_phrase"]
-  config.key_file    = ["key_file"]
-  config.client_id   = ["client_id"]
-  config.scope       = ["scope"]
-  config.email       = ["email"]
-end
+UserMigration.up
 ```
+or 
 
+```ruby
+AddPublishedToUser.change
+```
 
 #### Quering
 
@@ -136,7 +140,7 @@ NOTE: by default the adapter will set Id values as an SecureRandom.hex, and for 
 
 ### Migrations:
 
-This adapter has migration support for simple operations
+This adapter has migration support migrations built in, but 
 
 ```ruby
 class CreateUsers < ActiveRecord::Migration
@@ -163,7 +167,9 @@ end
 
 ```
 
-Note: Big query does not provide a way to update columns nor delete, so update_column, or remove_column migration are cancelled with and exeption.
+Note: 
++ Big query does not provide a way to update columns nor delete, so update_column, or remove_column migration are cancelled with and exception. 
++ Also the schema_migrations table is not created in DB, is created as a json file in db/schema_migrations.json instead. Be sure to ignore the file in your version control.
 
 ## Standalone Client:
 
@@ -365,8 +371,9 @@ GoogleBigquery::TableData.list(@project, @dataset_id, @table_name)
 #TODO:
 
 ActiveRecord:
-  + Test HBTM HMT Associations
-  + Generate AR schema migration records OR a YAML SCHEMA MIGRATION
   + AR migration copy tables to update it (copy to gs:// , delete table, import table from gs://)
-  + AR migrate record type
+  + AR migrate BQ record type
   + Make id and foreign keys types and values configurable
+  + Enhance , optionally Rake:db:setup & reset taks
+
+

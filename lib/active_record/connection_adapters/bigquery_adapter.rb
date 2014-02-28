@@ -80,12 +80,9 @@ module ActiveRecord
     # Creates a record with values matching those of the instance attributes
     # and returns its id.
     def create_record(attribute_names = @attributes.keys)  
-      #binding.pry
       record_timestamps_hardcoded
       attributes_values = self.changes.values.map(&:last)
-      
-      #binding.pry
-      
+            
       row_hash = Hash[ [ self.changes.keys, attributes_values ].transpose ]
       new_id =  SecureRandom.hex
       @rows =   {"rows"=> [{
@@ -254,9 +251,6 @@ module ActiveRecord
 
   end
 
-  #ActiveRecord::SchemaMigration.send :include, ActiveRecord::BigQuerySchemaMigration
-
-
   module BigQueryMigrator
 
     def self.included base
@@ -301,9 +295,9 @@ module ActiveRecord
           migrations.detect { |m| m["version"] == current_version }
         end
 
-        def migrated
-          @migrated_versions ||= Set.new(self.class.get_all_versions)
-        end
+        #def migrated
+        #  @migrated_versions ||= Set.new(self.class.get_all_versions)
+        #end
 
         private
 
@@ -340,8 +334,6 @@ module ActiveRecord
         end
 
         def string_to_time(string)
-          #binding.pry
-          #puts string
           return string unless string.is_a?(String)
           return nil if string.empty?
           fast_string_to_time(string) || fallback_string_to_time(string) || Time.at(string.to_f).send(Base.default_timezone)
@@ -576,10 +568,6 @@ module ActiveRecord
           end
         end
         result = GoogleBigquery::Dataset.delete(@config[:project], database )
-         if result == true
-            File.delete(SchemaMigration.schema_migration_path) rescue ""
-            return true
-          end
         result
       end
 
@@ -625,7 +613,6 @@ module ActiveRecord
       end
 
       def type_cast(value, column) # :nodoc:
-        #binding.pry
         return value.to_f if BigDecimal === value
         return super unless String === value
         return super unless column && value
@@ -668,7 +655,7 @@ module ActiveRecord
             records = result["totalRows"].to_i.zero? ? [] : result["rows"].map{|o| o["f"].map{|k,v| k["v"]} }
             stmt = records
           else
-            binding.pry
+            #binding.pry
             #BQ does not support prepared statements, yiak!
           end
 
@@ -730,7 +717,6 @@ module ActiveRecord
       # Returns an array of +SQLite3Column+ objects for the table specified by +table_name+.
       def columns(table_name) #:nodoc:
         schema = GoogleBigquery::Table.get(@config[:project], @config[:database], table_name)
-        #binding.pry
         schema["schema"]["fields"].map do |field|
           mode = field['mode'].present? && field['mode'] == "REQUIRED" ? false : true
           #column expects (name, default, sql_type = nil, null = true)
