@@ -1,6 +1,6 @@
 # GoogleBigquery
 
-GoogleBig Query ActiveRecord Adapter & API client
+GoogleBig Query ActiveRecord Adapter & standalone API client
 
 ## Use Cases:
 
@@ -126,7 +126,38 @@ see more at: https://developers.google.com/bigquery/query-reference#joins
   @user.save
 ```
 
+### Massive Export / Import of data
+
+Google Bigquery allows to import and export large datasets of data the default formats are JSON and CSV, currently the adapter is only able to export JSON format.
+
+#### Export
+
+The export can be acomplished very easy from an active record model as:
+```ruby
+User.bigquery_export(destination)
+```
+where destination should be a valid google cloud store uri. The adapter will manage that , so you only need to pass the file name. Example:
+
+    User.bigquery_export("file.json") 
+
+the adapter will convert that option to gs://<configured_database>/file.json. Just be sure to create the bucket propperly in Cloud Storage panel.
+Also if you don't pass the file argument you will get an generated uri like: gs://<configured_database>/<table_name>.json. 
+
+#### Import
+
+There are two ways to import massive data in bigquery, one is from a file from google cloud store and the second is from multipart Post
+
 NOTE: by default the adapter will set Id values as an SecureRandom.hex, and for now all the foreign keys are created as a STRING type 
+
+From google cloud storage:
+
+```ruby
+User.bigquery_import([an_array_with_paths_to_gs_uris])
+```
+
+From multipart/related post:
+      
+    PENDING
 
 #### Deletion and edition of single rows:
 
@@ -168,8 +199,8 @@ end
 ```
 
 Note: 
-+ Big query does not provide a way to update columns nor delete, so update_column, or remove_column migration are cancelled with and exception. 
-+ Also the schema_migrations table is not created in DB, is created as a json file in db/schema_migrations.json instead. Be sure to ignore the file in your version control.
++ Big query does not provide a way to update columns nor delete, so update_column, or remove_column migration are cancelled with an catched exception. 
++ Also the schema_migrations table is not created in DB, is created as a json file in db/schema_migrations.json instead. Be sure to add the file in your version control.
 
 ## Standalone Client:
 

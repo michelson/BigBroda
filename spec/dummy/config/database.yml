@@ -4,13 +4,14 @@
 #   Ensure the SQLite 3 gem is defined in your Gemfile
 #   gem 'sqlite3'
 development:
-  adapter: sqlite3
-  database: db/development.sqlite3
-  pool: 5
-  timeout: 5000
-  #adapter: 'bigquery'
-  #project: 985884699512
-  #database: "dummy_dev"
+  #adapter: sqlite3
+  #database: db/development.sqlite3
+  #pool: 5
+  #timeout: 5000
+  adapter: 'bigquery'
+  project: 985884699512 #"agile-kite-497"
+  database: "dummy_dev"
+  gsbucket: "bwit"
 
 # Warning: The database defined as "test" will be erased and
 # re-generated from your development database when you run "rake".
@@ -21,7 +22,7 @@ bigquery:
   database: "dummy_dev"
   adapter: 'bigquery'
   project: 985884699512
-  #database: "dummy_test"
+  gsbucket: "bwit"
 
 
 test:

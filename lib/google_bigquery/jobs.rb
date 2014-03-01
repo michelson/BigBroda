@@ -58,9 +58,8 @@ module GoogleBigquery
 
     #export data
     def self.export(project_id, dataset_id, table_id, bucket_location)
-      body = {
-      'projectId'=> project_id,
-      'configuration'=> {
+      body = {'projectId'=> project_id,
+       'configuration'=> {
         'extract'=> {
           'sourceTable'=> {
              'projectId'=> project_id,
@@ -72,22 +71,102 @@ module GoogleBigquery
          }
        }
       }
+
       res = GoogleBigquery::Auth.client.execute(
         :api_method=> GoogleBigquery::Auth.api.jobs.insert, 
         :body_object=> body, 
         :parameters=> {"projectId"=> project_id}
       )
+      
       job_id = JSON.parse(res.body)["jobReference"]["jobId"]
       puts 'Waiting for export to complete..'
+
+      loop do 
+        status = JSON.parse(self.get(project_id, job_id).body)
+
+        if 'DONE' == status['status']['state']
+
+          puts "Done exporting!"
+          if status["status"]["errors"]
+            puts status["status"]["errors"].map{|o| "#{o['reason']} : #{o['message']}"}
+          end
+
+          return
+
+        end
+        sleep(10)
+      end
+    end
+
+    def self.load(project_id, dataset_id, table_id, sources, fields)
+      body = { 'projectId'=> project_id,
+       'configuration'=> {
+        'load'=> {
+          'sourceUri' => sources.first,
+          'sourceUris' => sources, 
+          'schema' => {
+            "fields"=> fields
+            },
+          'destinationTable'=> {
+            'projectId'=> project_id,
+            'datasetId'=> dataset_id,
+            'tableId'=> table_id
+          }
+         }
+       }
+      }
+      res = GoogleBigquery::Auth.client.execute(
+        :api_method=> GoogleBigquery::Auth.api.jobs.insert, 
+        :body_object=> body, 
+        :parameters=> {"projectId"=> project_id}
+      )
+      #binding.pry
+      job_id = JSON.parse(res.body)["jobReference"]["jobId"]
+      puts 'Waiting for import to complete..'
       
       loop do 
-       status = JSON.parse(self.get(project_id, job_id).body)
-       if 'DONE' == status['status']['state']
-        puts "Done exporting!"
-        return
-       end
-       sleep(10)
+        status = JSON.parse(self.get(project_id, job_id).body)
+
+        if 'DONE' == status['status']['state']
+
+          puts "Done loading!"
+          if status["status"]["errors"]
+            puts status["status"]["errors"].map{|o| "#{o['reason']} : #{o['message']}"}
+          end
+
+          return
+
+        end
+        sleep(10)
       end
+    end
+
+    def self.import()
+    end
+
+    def self.copy()
+    end
+
+    private
+
+    def self.build_body_object(options)
+      project_id = options[:project_id] 
+      dataset_id = options[:dataset_id]
+      table_id   = options[:table_id]
+      bucket_location = options[:bucket_location]
+      {'projectId'=> project_id,
+       'configuration'=> {
+        'extract'=> {
+          'sourceTable'=> {
+             'projectId'=> project_id,
+             'datasetId'=> dataset_id,
+             'tableId'=> table_id
+           },
+          'destinationUri'=> "gs://#{bucket_location}",
+          'destinationFormat'=> 'NEWLINE_DELIMITED_JSON'
+         }
+       }
+      }
     end
 
   end

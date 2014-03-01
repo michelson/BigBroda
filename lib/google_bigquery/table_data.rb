@@ -2,13 +2,6 @@
 module GoogleBigquery
   class TableData < GoogleBigquery::Client
 
-    def stream(body, opts)
-      parse_response @client.client.execute( @client.api.tabledata.insert_all, projectId: "agile-kite-497", 
-        datasetId: "bwit", 
-        tableId: "TABLEID", 
-        body: "foo")
-    end
-
     def self.create(project_id, dataset_id, table_id, body={})
       res = GoogleBigquery::Auth.client.execute(
         :api_method=> GoogleBigquery::Auth.api.tabledata.insert_all, 

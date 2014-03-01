@@ -76,6 +76,10 @@ module ActiveRecord
       raise Error::NotImplementedFeature
     end
 
+    module ClassMethods
+      
+    end
+
     private
     # Creates a record with values matching those of the instance attributes
     # and returns its id.
@@ -174,7 +178,6 @@ module ActiveRecord
         end
       end
     end
-
   end
 
   module BigQuerySchemaMigration 
@@ -248,7 +251,6 @@ module ActiveRecord
         end
       end
     end
-
   end
 
   module BigQueryMigrator
@@ -315,8 +317,37 @@ module ActiveRecord
     end
 
     #alias :current :current_migration
-
   end
+
+  module LoadOperations
+    extend ActiveSupport::Concern
+    module ClassMethods
+      def bigquery_export(bucket_location = nil)
+        bucket_location = bucket_location.nil? ? "#{table_name}.json" : bucket_location
+        cfg = connection_config
+        GoogleBigquery::Jobs.export(cfg[:project], 
+          cfg[:database], 
+          table_name, 
+          "#{cfg[:database]}/#{bucket_location}")
+      end
+
+      def bigquery_load(bucket_location = [])
+        bucket_location = bucket_location.empty? ? ["#{cfg[:database]}/#{table_name}.json"] : bucket_location
+        cfg = connection_config
+        fields = columns.map{|o| {name: o.name, type: o.type} }
+        GoogleBigquery::Jobs.load(cfg[:project], 
+          cfg[:database], 
+          table_name, 
+          bucket_location, 
+          fields)
+      end
+
+      def bigquery_import()
+      end
+    end
+  end
+
+  ActiveRecord::Base.send :include, LoadOperations
 
   module ConnectionAdapters
 
