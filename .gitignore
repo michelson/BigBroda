@@ -16,7 +16,7 @@ test/tmp
 test/version_tmp
 tmp
 spec/fixtures/configs/account_config.yml
-spec/fixtures/keys/
+spec/fixtures/keys/*.p12
 
 spec/dummy/db/*.sqlite3
 spec/dummy/db/*.sqlite3-journal
