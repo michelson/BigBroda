@@ -126,6 +126,17 @@ see more at: https://developers.google.com/bigquery/query-reference#joins
   @user.save
 ```
 
+NOTE: by default the adapter will set Id values as an SecureRandom.hex, and for now all the foreign keys are created as a STRING type 
+
+#### Deletion and edition of single rows:
+
+  BigQuery tables are append-only. The query language does not currently support either updating or deleting data. In order to update or delete data, you must delete the table, then recreate the table with new data. Alternatively, you could write a query that modifies the data and specify a new results table.
+
+  I would actually recommend creating a new table for each day. Since BigQuery charges by amount of data queried over, this would be most economical for you, rather than having to query over entire massive datasets every time.
+
+  By the way - how are you currently collecting your data?
+
+
 ### Massive Export / Import of data
 
 Google Bigquery allows to import and export large datasets of data the default formats are JSON and CSV, currently the adapter is only able to export JSON format.
@@ -140,14 +151,12 @@ where destination should be a valid google cloud store uri. The adapter will man
 
     User.bigquery_export("file.json") 
 
-the adapter will convert that option to gs://<configured_database>/file.json. Just be sure to create the bucket propperly in Cloud Storage panel.
-Also if you don't pass the file argument you will get an generated uri like: gs://<configured_database>/<table_name>.json. 
+the adapter will convert that option to gs://[configured_database]/[file.json]. Just be sure to create the bucket propperly in Cloud Storage panel.
+Also if you don't pass the file argument you will get an generated uri like: gs://[configured_database]/[table_name].json. 
 
 #### Import
 
 There are two ways to import massive data in bigquery, one is from a file from google cloud store and the second is from multipart Post
-
-NOTE: by default the adapter will set Id values as an SecureRandom.hex, and for now all the foreign keys are created as a STRING type 
 
 From google cloud storage:
 
@@ -158,16 +167,6 @@ User.bigquery_import([an_array_with_paths_to_gs_uris])
 From multipart/related post:
       
     PENDING
-
-#### Deletion and edition of single rows:
-
-  BigQuery tables are append-only. The query language does not currently support either updating or deleting data. In order to update or delete data, you must delete the table, then recreate the table with new data. Alternatively, you could write a query that modifies the data and specify a new results table.
-
-  I would actually recommend creating a new table for each day. Since BigQuery charges by amount of data queried over, this would be most economical for you, rather than having to query over entire massive datasets every time.
-
-  By the way - how are you currently collecting your data?
-
-
 
 ### Migrations:
 
@@ -405,6 +404,5 @@ ActiveRecord:
   + AR migration copy tables to update it (copy to gs:// , delete table, import table from gs://)
   + AR migrate BQ record type
   + Make id and foreign keys types and values configurable
-  + Enhance , optionally Rake:db:setup & reset taks
-
+  + Jobs make multipart/related upload
 
