@@ -1,6 +1,6 @@
-# GoogleBigquery
+# BigBroda
 
-GoogleBig Query ActiveRecord Adapter & standalone API client
+GoogleBigQuery ActiveRecord Adapter & standalone API client
 
 ## Use Cases:
 
@@ -17,7 +17,7 @@ So, use BigQuery as an OLAP (Online Analytical Processing) service, not as OLTP 
 
 Add 'google_bigquery' to your application's Gemfile or install it yourself as:
 
-    $ gem install google_bigquery
+    $ gem install bigbroda
 
 ## Rails / ActiveRecord:
 
