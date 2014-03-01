@@ -8,9 +8,9 @@ Gem::Specification.new do |spec|
   spec.version       = GoogleBigquery::VERSION
   spec.authors       = ["miguel michelson"]
   spec.email         = ["miguelmichelson@gmail.com"]
-  spec.description   = "Handy abstraction for GoogleBigQuery"
-  spec.summary       = "This library is build on top of google-api-client, ActiveRecord compatible"
-  spec.homepage      = "https://github.com/michelson/google_big_data"
+  spec.description   = "GoogleBigQuery ActiveRecord Adapter & standalone API client"
+  spec.summary       = "This library is build on top of google-api-client, ActiveRecord >4 compatible"
+  spec.homepage      = "https://github.com/michelson/BigBroda"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files`.split($/)
