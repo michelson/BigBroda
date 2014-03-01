@@ -9,8 +9,9 @@ gem "pry"
 gem 'pry-remote'
 gem 'pry-nav'
 gem 'sqlite3'
-gem "rspec"
+
 group :test do
+  gem "rspec"
   gem 'vcr'
   gem 'webmock', '1.16.0', require: false
 end
