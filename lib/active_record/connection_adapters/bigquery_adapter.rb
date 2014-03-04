@@ -334,7 +334,7 @@ module ActiveRecord
       def bigquery_load(bucket_location = [])
         bucket_location = bucket_location.empty? ? ["#{cfg[:database]}/#{table_name}.json"] : bucket_location
         cfg = connection_config
-        fields = columns.map{|o| {name: o.name, type: o.type} }
+        fields = columns.map{|o| {name: o.name, type: o.sql_type, mode: "nullable" } }
         GoogleBigquery::Jobs.load(cfg[:project], 
           cfg[:database], 
           table_name, 

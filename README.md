@@ -126,6 +126,11 @@ see more at: https://developers.google.com/bigquery/query-reference#joins
   @user.save
 ```
 
+```ruby
+User.create([{name: "miki"}, {name: "jara"}])
+
+```
+
 NOTE: by default the adapter will set Id values as an SecureRandom.hex, and for now all the foreign keys are created as a STRING type 
 
 #### Deletion and edition of single rows:

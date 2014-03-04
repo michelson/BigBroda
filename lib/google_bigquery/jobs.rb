@@ -57,6 +57,7 @@ module GoogleBigquery
     end
 
     #export data
+    #TODO: get mappings for formatting options
     def self.export(project_id, dataset_id, table_id, bucket_location)
       body = {'projectId'=> project_id,
        'configuration'=> {
@@ -77,7 +78,7 @@ module GoogleBigquery
         :body_object=> body, 
         :parameters=> {"projectId"=> project_id}
       )
-      
+   
       job_id = JSON.parse(res.body)["jobReference"]["jobId"]
       puts 'Waiting for export to complete..'
 
@@ -98,15 +99,15 @@ module GoogleBigquery
       end
     end
 
+    #TODO: get mappings for formatting options
     def self.load(project_id, dataset_id, table_id, sources, fields)
       body = { 'projectId'=> project_id,
        'configuration'=> {
         'load'=> {
+          'sourceFormat' => "NEWLINE_DELIMITED_JSON",
           'sourceUri' => sources.first,
           'sourceUris' => sources, 
-          'schema' => {
-            "fields"=> fields
-            },
+          
           'destinationTable'=> {
             'projectId'=> project_id,
             'datasetId'=> dataset_id,

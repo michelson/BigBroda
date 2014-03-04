@@ -14,26 +14,26 @@
 ActiveRecord::Schema.define(version: 20140227015551) do
 
   create_table "log_data", force: true do |t|
-    t.string   "name"
-    t.string   "description"
-    t.datetime "created_at"
-    t.datetime "updated_at"
+    t.string    "name"
+    t.string    "description"
+    t.timestamp "created_at"
+    t.timestamp "updated_at"
   end
 
   create_table "posts", force: true do |t|
-    t.string   "title"
-    t.integer  "user_id"
-    t.datetime "created_at"
-    t.datetime "updated_at"
+    t.string    "title"
+    t.string    "user_id"
+    t.timestamp "created_at"
+    t.timestamp "updated_at"
   end
 
   create_table "users", force: true do |t|
-    t.string   "name"
-    t.boolean  "admin"
-    t.integer  "phone"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-    t.string   "last_name"
+    t.string    "name"
+    t.boolean   "admin"
+    t.integer   "phone"
+    t.timestamp "created_at"
+    t.timestamp "updated_at"
+    t.string    "last_name"
   end
 
 end
