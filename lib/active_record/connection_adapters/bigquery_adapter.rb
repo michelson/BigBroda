@@ -84,7 +84,7 @@ module ActiveRecord
     private
     # Creates a record with values matching those of the instance attributes
     # and returns its id.
-    def create_record(attribute_names = @attributes.keys)  
+    def _create_record(attribute_names = @attributes.keys)
       record_timestamps_hardcoded
       attributes_values = self.changes.values.map(&:last).map!{|v| self.class.connection.quote v }
             
@@ -108,6 +108,9 @@ module ActiveRecord
       @new_record = false
       id
     end
+
+    # Backward compatibility with older versions of ActiveRecord
+    alias_method :create_record, :_create_record
 
     #Partially copied from activerecord::Timezones
     def record_timestamps_hardcoded
