@@ -84,9 +84,9 @@ module ActiveRecord
     private
     # Creates a record with values matching those of the instance attributes
     # and returns its id.
-    def create_record(attribute_names = @attributes.keys)  
+    def _create_record(attribute_names = @attributes.keys)
       record_timestamps_hardcoded
-      attributes_values = self.changes.values.map(&:last)
+      attributes_values = self.changes.values.map(&:last).map!{|v| self.class.connection.quote v }
             
       row_hash = Hash[ [ self.changes.keys, attributes_values ].transpose ]
       new_id =  SecureRandom.hex
@@ -108,6 +108,9 @@ module ActiveRecord
       @new_record = false
       id
     end
+
+    # Backward compatibility with older versions of ActiveRecord
+    alias_method :create_record, :_create_record
 
     #Partially copied from activerecord::Timezones
     def record_timestamps_hardcoded
@@ -606,12 +609,20 @@ module ActiveRecord
 
       # QUOTING ==================================================
 
+      def remove_quotes(value)
+        if value.kind_of?(String) && value.length >= 2 && value.start_with?("'") && value.end_with?("'")
+          value[1..-2]
+        else
+          value
+        end
+      end
+
       def quote(value, column = nil)
         if value.kind_of?(String) && column && column.type == :binary && column.class.respond_to?(:string_to_binary)
           s = column.class.string_to_binary(value).unpack("H*")[0]
           "x'#{s}'"
         else
-          super
+          remove_quotes(super)
         end
       end
 
@@ -627,9 +638,15 @@ module ActiveRecord
         name
       end
 
+      def quote_string(s)
+        # Strings are quoted by the JSON serializer
+        s
+      end
+
       # Quote date/time values for use in SQL input. Includes microseconds
       # if the value is a Time responding to usec.
       def quoted_date(value) #:nodoc:
+        value = value.to_time if not value.kind_of?(Time) and value.respond_to?(:to_time)
         if value.respond_to?(:usec)
           "#{super}.#{sprintf("%06d", value.usec)}"
         else
