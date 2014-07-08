@@ -1,5 +1,6 @@
 require 'active_record/connection_adapters/abstract_adapter'
 require 'active_record/connection_adapters/statement_pool'
+require 'active_record/connection_adapters/abstract/schema_statements'
 require 'arel/visitors/bind_visitor'
 
 module ActiveRecord
@@ -373,7 +374,8 @@ module ActiveRecord
     end
     
     class BigqueryAdapter < AbstractAdapter
-      
+
+      include SchemaStatements
 
       class Version
       end
@@ -568,7 +570,7 @@ module ActiveRecord
           #:timestamp   => { :name => "datetime" },
           :timestamp    => { name: "TIMESTAMP" },
           #:time        => { :name => "time" },
-          #:date        => { :name => "date" },
+          :date        => { :name => "TIMESTAMP" },
           :record      => { :name => "RECORD" },
           :boolean     => { :name => "BOOLEAN" }
         }
@@ -796,8 +798,7 @@ module ActiveRecord
           drop_table(table_name, options)
         end
         
-
-        hsh = td.columns.map { |c|  {"name"=> c[:name], "type"=> c[:type] }  }
+        hsh = td.columns.map { |c|  {"name"=> c[:name], "type"=> type_to_sql(c[:type]) }  }
 
         @table_body = {  "tableReference"=> {
                             "projectId"=> @config[:project],
