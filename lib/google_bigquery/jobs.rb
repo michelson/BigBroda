@@ -27,11 +27,10 @@ module GoogleBigquery
     end
 
     #Retrieves the results of a query job.
-    def self.getQueryResults(project_id , job_id, body={})
+    def self.getQueryResults(project_id , job_id, params={})
       res = GoogleBigquery::Auth.client.execute(
         :api_method=> GoogleBigquery::Auth.api.jobs.get_query_results, 
-        :body_object=> body, 
-        :parameters=> {"projectId"=> project_id, "jobId"=>job_id}
+        :parameters=> {"projectId"=> project_id, "jobId"=>job_id}.merge(params)
       )
       parse_response(res)
     end
@@ -47,11 +46,10 @@ module GoogleBigquery
     end
 
     #Lists all the Jobs in the specified project that were started by the user.
-    def self.list(project_id, body={})
+    def self.list(project_id, params={})
       res = GoogleBigquery::Auth.client.execute(
         :api_method=> GoogleBigquery::Auth.api.jobs.list, 
-        :body_object=> body, 
-        :parameters=> {"projectId"=> project_id}
+        :parameters=> {"projectId"=> project_id}.merge(params)
       )
       parse_response(res)
     end
