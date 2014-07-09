@@ -23,7 +23,7 @@ module GoogleBigquery
         :api_method=> GoogleBigquery::Auth.api.jobs.get, 
         :parameters=> {"projectId"=> project_id, "jobId"=>job_id}
       )
-      #parse_response(res)
+      parse_response(res)
     end
 
     #Retrieves the results of a query job.
