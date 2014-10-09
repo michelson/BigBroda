@@ -9,9 +9,8 @@ module GoogleBigquery
 
     mattr_accessor  :pass_phrase,
                     :key_file,
-                    :client_id,
                     :scope,
-                    :profile_id,
-                    :email
+                    :email,
+                    :retries
   end
 end

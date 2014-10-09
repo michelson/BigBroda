@@ -31,11 +31,13 @@ Or generate a file in config/initializers/bigquery.rb with the following content
 GoogleBigquery::Config.setup do |config|
   config.pass_phrase = ["pass_phrase"]
   config.key_file    = ["key_file"]
-  config.client_id   = ["client_id"]
   config.scope       = ["scope"]
   config.email       = ["email"]
+  config.retries     = [retries]
 end
 ```
+
+retries indicates the number of times to retry on recoverable errors (no retries if set to one or not present)
 
 ### Active Record Adapter
 
@@ -218,11 +220,13 @@ Note:
 GoogleBigquery::Config.setup do |config|
   config.pass_phrase = "notasecret"
   config.key_file    = /location/to_your/key_file.p12
-  config.client_id   = "XXXXX.apps.googleusercontent.com"
   config.scope       = "https://www.googleapis.com/auth/bigquery"
   config.email       = "XXXXXX@developer.gserviceaccount.com"
+  config.retries     = 1
 end
 ```
+
+retries indicates the number of times to retry on recoverable errors (no retries if set to one or not present)
 
   And authorize client:
 
