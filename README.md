@@ -1,14 +1,20 @@
 # BigBroda
 
+[![Build Status](https://travis-ci.org/michelson/BigBroda.svg?branch=travis-enabled)](https://travis-ci.org/michelson/BigBroda)
+
+[![Code Climate](https://codeclimate.com/github/michelson/BigBroda/badges/gpa.svg)](https://codeclimate.com/github/michelson/BigBroda)
+
+[![Dependency Status](https://gemnasium.com/michelson/BigBroda.svg)](https://gemnasium.com/michelson/BigBroda)
+
 GoogleBigQuery ActiveRecord Adapter & standalone API client
 
 ## Use Cases:
 
 https://developers.google.com/bigquery/what-is-bigquery
 
-BigQuery is fantastic for running ad hoc aggregate queries across a very very large dataset - large web logs, ad analysis, sensor data, sales data... etc. Basically, many kinds of "full table scan" queries. Queries are written in a SQL-style language (you don't have to write custom MapReduce functions). 
+BigQuery is fantastic for running ad hoc aggregate queries across a very very large dataset - large web logs, ad analysis, sensor data, sales data... etc. Basically, many kinds of "full table scan" queries. Queries are written in a SQL-style language (you don't have to write custom MapReduce functions).
 
-But!, Bigquery has a constraint to consider before diving in, 
+But!, Bigquery has a constraint to consider before diving in,
 BQ is append only , that means that you can't update records or delete them.
 
 So, use BigQuery as an OLAP (Online Analytical Processing) service, not as OLTP (Online Transactional Processing). In other words, use BigQuery as a DataWareHouse.
@@ -47,7 +53,7 @@ ActiveRecord connection in plain ruby:
 
 ```ruby
 ActiveRecord::Base.establish_connection(
-  :adapter => 'bigquery', 
+  :adapter => 'bigquery',
   :project => "MyBigQueryProject",
   :database => "MyBigTable"
 )
@@ -83,7 +89,7 @@ Then you will have to execute the migration programaticly. like this:
 ```ruby
 UserMigration.up
 ```
-or 
+or
 
 ```ruby
 AddPublishedToUser.change
@@ -133,7 +139,7 @@ User.create([{name: "miki"}, {name: "jara"}])
 
 ```
 
-NOTE: by default the adapter will set Id values as an SecureRandom.hex, and for now all the foreign keys are created as a STRING type 
+NOTE: by default the adapter will set Id values as an SecureRandom.hex, and for now all the foreign keys are created as a STRING type
 
 #### Deletion and edition of single rows:
 
@@ -156,10 +162,10 @@ User.bigquery_export(destination)
 ```
 where destination should be a valid google cloud store uri. The adapter will manage that , so you only need to pass the file name. Example:
 
-    User.bigquery_export("file.json") 
+    User.bigquery_export("file.json")
 
 the adapter will convert that option to gs://[configured_database]/[file.json]. Just be sure to create the bucket propperly in Cloud Storage panel.
-Also if you don't pass the file argument you will get an generated uri like: gs://[configured_database]/[table_name].json. 
+Also if you don't pass the file argument you will get an generated uri like: gs://[configured_database]/[table_name].json.
 
 #### Import
 
@@ -172,12 +178,12 @@ User.bigquery_import([an_array_with_paths_to_gs_uris])
 ```
 
 From multipart/related post:
-      
+
     PENDING
 
 ### Migrations:
 
-This adapter has migration support migrations built in, but 
+This adapter has migration support migrations built in, but
 
 ```ruby
 class CreateUsers < ActiveRecord::Migration
@@ -204,8 +210,8 @@ end
 
 ```
 
-Note: 
-+ Big query does not provide a way to update columns nor delete, so update_column, or remove_column migration are cancelled with an catched exception. 
+Note:
++ Big query does not provide a way to update columns nor delete, so update_column, or remove_column migration are cancelled with an catched exception.
 + Also the schema_migrations table is not created in DB, is created as a json file in db/schema_migrations.json instead. Be sure to add the file in your version control.
 
 ## Standalone Client:
@@ -278,13 +284,13 @@ GoogleBigquery::Dataset.list(@project_id)
 
 #### Create/Insert:
 
-```ruby  
+```ruby
 GoogleBigquery::Dataset.create(@project, {"datasetReference"=> { "datasetId" => @dataset_id }} )
 ```
 
 #### Delete:
 
-```ruby  
+```ruby
 GoogleBigquery::Dataset.delete(@project, @dataset_id }} )
 ```
 
@@ -292,10 +298,10 @@ GoogleBigquery::Dataset.delete(@project, @dataset_id }} )
 
   Updates information in an existing dataset. The update method replaces the entire dataset resource, whereas the patch method only replaces fields that are provided in the submitted dataset resource.
 
-```ruby  
+```ruby
 GoogleBigquery::Dataset.update(@project, @dataset_id,
       {"datasetReference"=> {
-       "datasetId" =>@dataset_id }, 
+       "datasetId" =>@dataset_id },
       "description"=> "foobar"} )
 ```
 
@@ -305,7 +311,7 @@ GoogleBigquery::Dataset.update(@project, @dataset_id,
 ```ruby
 GoogleBigquery::Dataset.patch(@project, @dataset_id,
         {"datasetReference"=> {
-         "datasetId" =>@dataset_id }, 
+         "datasetId" =>@dataset_id },
         "description"=> "foobar"} )
 ```
 
@@ -320,8 +326,8 @@ GoogleBigquery::Dataset.patch(@project, @dataset_id,
 @table_body = {  "tableReference"=> {
                     "projectId"=> @project,
                     "datasetId"=> @dataset_id,
-                    "tableId"=> @table_name}, 
-        "schema"=> [fields: 
+                    "tableId"=> @table_name},
+        "schema"=> [fields:
                       {:name=> "name", :type=> "string", :mode => "REQUIRED"},
                       {:name=>  "age", :type=> "integer"},
                       {:name=> "weight", :type=> "float"},
@@ -330,17 +336,17 @@ GoogleBigquery::Dataset.patch(@project, @dataset_id,
       }
 
 GoogleBigquery::Table.create(@project, @dataset_id, @table_body
-```   
+```
 
 #### Update:
 
 ```ruby
     GoogleBigquery::Table.update(@project, @dataset_id, @table_name,
         {"tableReference"=> {
-         "projectId" => @project, "datasetId" =>@dataset_id, "tableId"  => @table_name }, 
+         "projectId" => @project, "datasetId" =>@dataset_id, "tableId"  => @table_name },
         "description"=> "foobar"} )
 ```
-       
+
 #### Delete:
 
 ```ruby
@@ -354,7 +360,7 @@ GoogleBigquery::Table.delete(@project, @dataset_id, @table_name )
 ```
 
 ### Table Data
-  
+
   https://developers.google.com/bigquery/docs/reference/v2/tabledata
 
 #### InsertAll
@@ -406,7 +412,7 @@ GoogleBigquery::TableData.list(@project, @dataset_id, @table_name)
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create new Pull Request
 
- 
+
 #TODO:
 
 ActiveRecord:
