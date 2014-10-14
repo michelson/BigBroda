@@ -1,6 +1,6 @@
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 require 'rspec'
-require 'debugger'
+require 'debugger' if Gem.ruby_version < Gem::Version.new('2.0')
 require File.join(File.dirname(__FILE__), '../lib', 'google_bigquery')
 require 'stringio'
 require "pry"
@@ -36,12 +36,10 @@ RSpec.configure do |config|
     GoogleBigquery::Config.setup do |config|
       config.pass_phrase = config_options["pass_phrase"]
       config.key_file    = config_options["key_file"]
-      config.client_id   = config_options["client_id"]
       config.scope       = config_options["scope"]
-      config.profile_id  = config_options["profile_id"]
       config.email       =  config_options["email"]
+      config.retries     = config_options["retries"]
     end
-    GoogleBigquery::Config
     @project = config_options["options"]
   end
 

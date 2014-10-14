@@ -1,6 +1,5 @@
 pass_phrase: "notasecret"
 pem: XXXXXXX-privatekey.p12
-client_id: "XXXXXXXXX.apps.googleusercontent.com"
 scope: "https://www.googleapis.com/auth/bigquery"
 profile_id: "XXXXXX"
 email: "XXXXXXX@developer.gserviceaccount.com"

@@ -4,7 +4,7 @@ source 'https://rubygems.org'
 gemspec
 
 gem "certified"
-gem "debugger"
+gem "debugger", platform: :ruby_19
 gem "pry"
 gem 'pry-remote'
 gem 'pry-nav'
