@@ -1,9 +1,7 @@
 # BigBroda
 
 [![Build Status](https://travis-ci.org/michelson/BigBroda.svg?branch=travis-enabled)](https://travis-ci.org/michelson/BigBroda)
-
 [![Code Climate](https://codeclimate.com/github/michelson/BigBroda/badges/gpa.svg)](https://codeclimate.com/github/michelson/BigBroda)
-
 [![Dependency Status](https://gemnasium.com/michelson/BigBroda.svg)](https://gemnasium.com/michelson/BigBroda)
 
 GoogleBigQuery ActiveRecord Adapter & standalone API client

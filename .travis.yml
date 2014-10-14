@@ -1,9 +1,15 @@
 language: ruby
+
 script: bundle exec rake
+
 rvm:
-- 2.0.0
+  - 2.0.0
+
 before_install:
-- openssl aes-256-cbc -K $encrypted_095360ea6fc8_key -iv $encrypted_095360ea6fc8_iv
-  -in 5e2f3273c34e2259c2a0a2c0a107d777b37d3880-privatekey.p12.enc -out spec/fixtures/keys/5e2f3273c34e2259c2a0a2c0a107d777b37d3880-privatekey.p12 -d
-- openssl aes-256-cbc -K $encrypted_095360ea6fc8_key -iv $encrypted_095360ea6fc8_iv
-  -in account_config.yml.enc -out spec/fixtures/configs/account_config.yml -d
+
+  - openssl aes-256-cbc -K $encrypted_095360ea6fc8_key -iv $encrypted_095360ea6fc8_iv
+    -in account_config.yml.enc -out spec/fixtures/configs/account_config.yml -d
+
+  - openssl aes-256-cbc -K $encrypted_095360ea6fc8_key -iv $encrypted_095360ea6fc8_iv
+    -in 5e2f3273c34e2259c2a0a2c0a107d777b37d3880-privatekey.p12.enc -out spec/fixtures/keys/5e2f3273c34e2259c2a0a2c0a107d777b37d3880-privatekey.p12
+    -d
