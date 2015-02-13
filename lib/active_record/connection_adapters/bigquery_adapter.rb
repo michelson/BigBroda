@@ -13,13 +13,13 @@ module ActiveRecord
       end
     end
     class NotImplementedColumnOperation < Standard
-      def message 
+      def message
         "Google big query doesn't allow this column operation"
       end
     end
 
     class PendingFeature < Standard
-      def message 
+      def message
         "Sorry, this is a pending feature, it will be implemented soon."
       end
     end
@@ -35,14 +35,15 @@ module ActiveRecord
       end
       db = GoogleBigquery::Auth.authorized? ? GoogleBigquery::Auth.client : GoogleBigquery::Auth.new.authorize
       #db #quizas deberia ser auth.api o auth.client
-      
-      #In case we are using a bigquery adapter as standard config in database.yml 
+
+      #In case we are using a bigquery adapter as standard config in database.yml
       #All models are BigQuery enabled
       ActiveRecord::Base.send :include, ActiveRecord::BigQueryPersistence
       ActiveRecord::SchemaMigration.send :include, ActiveRecord::BigQuerySchemaMigration
       ActiveRecord::Migrator.send :include, ActiveRecord::BigQueryMigrator
       ActiveRecord::Relation.send :include, ActiveRecord::BigQueryRelation
       ActiveRecord::Base.send :include, ActiveRecord::BigQuerying
+
       #db.busy_timeout(ConnectionAdapters::SQLite3Adapter.type_cast_config_to_integer(config[:timeout])) if config[:timeout]
       ConnectionAdapters::BigqueryAdapter.new(db, logger, config)
     rescue  => e
@@ -61,6 +62,8 @@ module ActiveRecord
     module ClassMethods
       def establish_bq_connection(path)
         self.send :include, ActiveRecord::BigQueryPersistence
+        self.send :include, ActiveRecord::BigQueryRelation
+        self.send :include, ActiveRecord::BigQuerying
         establish_connection path
       end
     end
@@ -78,16 +81,16 @@ module ActiveRecord
     end
 
     module ClassMethods
-      
+
     end
 
     private
     # Creates a record with values matching those of the instance attributes
     # and returns its id.
-    def create_record(attribute_names = @attributes.keys)  
+    def create_record(attribute_names = @attributes.keys)
       record_timestamps_hardcoded
       attributes_values = self.changes.values.map(&:last)
-            
+
       row_hash = Hash[ [ self.changes.keys, attributes_values ].transpose ]
       new_id =  SecureRandom.hex
       @rows =   {"rows"=> [{
@@ -96,9 +99,9 @@ module ActiveRecord
                           }]
                 }
       conn_cfg = self.class.connection_config
-      result = GoogleBigquery::TableData.create(conn_cfg[:project], 
-        conn_cfg[:database], 
-        self.class.table_name , 
+      result = GoogleBigquery::TableData.create(conn_cfg[:project],
+        conn_cfg[:database],
+        self.class.table_name ,
         @rows )
 
       #raise result["error"]["errors"].map{|o| "[#{o['domain']}]: #{o['reason']} #{o['message']}" }.join(", ") if result["error"].present?
@@ -129,7 +132,7 @@ module ActiveRecord
   end
 
   # = Active Record Quering
-  module BigQuerying 
+  module BigQuerying
     def find_by_sql(sql, binds = [])
       cfg = ActiveRecord::Base.connection_config
       result_set = connection.select_all(sanitize_sql(sql), "#{name} Load", binds)
@@ -140,20 +143,19 @@ module ActiveRecord
       else
         ActiveSupport::Deprecation.warn "the object returned from `select_all` must respond to `column_types`"
       end
-      # When AR BigQuery queries uses joins , the fields appear as [database.table].field , 
-      # so at least whe clean the class columns to initialize the record propperly
+      # When AR BigQuery queries uses joins , the fields appear as [database.table].field ,
+      # so at least we clean the class columns to initialize the record propperly
       #"whoa1393194159_users_id".gsub(/#{@config[:database]}_#{self.table_name}_/, "")
       result_set.instance_variable_set("@columns", result_set.columns.map{|o| o.gsub(/#{cfg[:database]}_#{self.table_name}_/, "") } )
-      
+
       result_set.map { |record| instantiate(record, column_types) }
     end
   end
 
   # = Active Record Relation
   module BigQueryRelation
-
-    def self.included base
-      base.class_eval do
+    extend ActiveSupport::Concern
+      module ClassMethods
         def delete(id_or_array)
           raise Error::NotImplementedFeature
         end
@@ -178,11 +180,10 @@ module ActiveRecord
           raise Error::NotImplementedFeature
         end
       end
-    end
   end
 
-  module BigQuerySchemaMigration 
-    
+  module BigQuerySchemaMigration
+
     def self.included base
       attr_accessor :migration_file_pwd
       base.instance_eval do
@@ -258,7 +259,7 @@ module ActiveRecord
 
     def self.included base
       #overload class methods
-      base.instance_eval do 
+      base.instance_eval do
         def get_all_versions
           SchemaMigration.all.map { |x| x["version"].to_i }.sort
         end
@@ -326,9 +327,9 @@ module ActiveRecord
       def bigquery_export(bucket_location = nil)
         bucket_location = bucket_location.nil? ? "#{table_name}.json" : bucket_location
         cfg = connection_config
-        GoogleBigquery::Jobs.export(cfg[:project], 
-          cfg[:database], 
-          table_name, 
+        GoogleBigquery::Jobs.export(cfg[:project],
+          cfg[:database],
+          table_name,
           "#{cfg[:database]}/#{bucket_location}")
       end
 
@@ -336,10 +337,10 @@ module ActiveRecord
         bucket_location = bucket_location.empty? ? ["#{cfg[:database]}/#{table_name}.json"] : bucket_location
         cfg = connection_config
         fields = columns.map{|o| {name: o.name, type: o.sql_type, mode: "nullable" } }
-        GoogleBigquery::Jobs.load(cfg[:project], 
-          cfg[:database], 
-          table_name, 
-          bucket_location, 
+        GoogleBigquery::Jobs.load(cfg[:project],
+          cfg[:database],
+          table_name,
+          bucket_location,
           fields)
       end
 
@@ -372,7 +373,7 @@ module ActiveRecord
         end
       end
     end
-    
+
     class BigqueryAdapter < AbstractAdapter
 
       include SchemaStatements
@@ -587,7 +588,7 @@ module ActiveRecord
       end
 
       def create_database(database)
-        result = GoogleBigquery::Dataset.create(@config[:project], 
+        result = GoogleBigquery::Dataset.create(@config[:project],
           {"datasetReference"=> { "datasetId" => database }} )
         result
       end
@@ -595,7 +596,7 @@ module ActiveRecord
       def drop_database(database)
         tables = GoogleBigquery::Table.list(@config[:project], database)["tables"]
         unless tables.blank?
-          tables.map!{|o| o["tableReference"]["tableId"]} 
+          tables.map!{|o| o["tableReference"]["tableId"]}
           tables.each do |table_id|
             GoogleBigquery::Table.delete(@config[:project], database, table_id)
           end
@@ -680,7 +681,7 @@ module ActiveRecord
 
       def exec_query(sql, name = nil, binds = [])
         log(sql, name, binds) do
-          
+
           # Don't cache statements if they are not prepared
           if without_prepared_statement?(binds)
             result = GoogleBigquery::Jobs.query(@config[:project], {"query"=> sql })
@@ -797,13 +798,13 @@ module ActiveRecord
         if options[:force] && table_exists?(table_name)
           drop_table(table_name, options)
         end
-        
+
         hsh = td.columns.map { |c|  {"name"=> c[:name], "type"=> type_to_sql(c[:type]) }  }
 
         @table_body = {  "tableReference"=> {
                             "projectId"=> @config[:project],
                             "datasetId"=> @config[:database],
-                            "tableId"=> td.name}, 
+                            "tableId"=> td.name},
                           "schema"=> [fields: hsh]
                       }
 
@@ -837,9 +838,9 @@ module ActiveRecord
       end
 
       def add_column(table_name, column_name, type, options = {}) #:nodoc:
-       
+
         if supports_add_column? && valid_alter_table_options( type, options )
-        
+
           hsh = table_name.classify.constantize.columns.map { |c|  {"name"=> c.name, "type"=> c.type }  }
           hsh << {"name"=> column_name, :type=> type}
           fields = [ fields: hsh ]
@@ -848,10 +849,10 @@ module ActiveRecord
             {"tableReference"=> {
              "projectId" => @config[:project],
              "datasetId" =>@config[:database],
-             "tableId"  => table_name }, 
+             "tableId"  => table_name },
              "schema"   => fields,
             "description"=> "added from migration"} )
-        
+
         else
           bypass_feature
         end
@@ -866,7 +867,7 @@ module ActiveRecord
         end
       end
 
-      def remove_column(table_name, column_name, type = nil, options = {}) #:nodoc: 
+      def remove_column(table_name, column_name, type = nil, options = {}) #:nodoc:
         bypass_feature
       end
 
@@ -899,7 +900,7 @@ module ActiveRecord
       end
 
       def dump_schema_information #:nodoc:
-        bypass_feature    
+        bypass_feature
       end
 
       def assume_migrated_upto_version(version, migrations_paths = ActiveRecord::Migrator.migrations_paths)
@@ -928,11 +929,11 @@ module ActiveRecord
         end
 
         def copy_table(from, to, options = {}) #:nodoc:
-           
+
         end
 
         def copy_table_indexes(from, to, rename = {}) #:nodoc:
-          
+
         end
 
         def copy_table_contents(from, to, columns, rename = {}) #:nodoc:
@@ -944,7 +945,7 @@ module ActiveRecord
         end
 
     end
- 
+
   end
 
 end
