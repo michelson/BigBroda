@@ -9,6 +9,7 @@ gem "pry"
 gem 'pry-remote'
 gem 'pry-nav'
 gem 'sqlite3'
+gem "appraisal"
 
 group :test do
   gem "rspec"
