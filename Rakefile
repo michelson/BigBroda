@@ -1,5 +1,5 @@
-require "rubygems"
-require "bundler/setup"
+#require "rubygems"
+#require "bundler/setup"
 
 require "bundler/gem_tasks"
 
@@ -10,6 +10,6 @@ task :default => :spec
 
 desc 'Test the BQ plugin.'
 RSpec::Core::RakeTask.new('spec') do |t|
-    t.pattern = FileList['spec/**/*_spec.rb']
+  t.pattern = FileList['spec/**/*_spec.rb']
 end
 
