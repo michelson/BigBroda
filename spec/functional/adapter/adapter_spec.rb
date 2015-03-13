@@ -137,6 +137,7 @@ describe "ActiveRecord Adapter", :vcr => { :allow_unused_http_interactions => tr
       #User.create(name: "frank capra")
       #User.find_by(id: "some-id-1393025921")
       #User.where("id =? and name= ?", "some-id-1393025921", "User 2014-02-21 20:38:41 -0300")
+      binding.pry
       expect(User.count).to be 1
       expect(User.first).to be_an_instance_of User
       expect(User.all.size).to be 1
@@ -197,6 +198,7 @@ describe "ActiveRecord Adapter", :vcr => { :allow_unused_http_interactions => tr
       }
 
       it "users_posts" do
+        binding.pry
         User.create(name: "ALF")
         #sleep 50
         post = User.first.posts.create(title: "yeah")
