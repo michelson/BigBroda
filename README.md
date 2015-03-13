@@ -21,7 +21,7 @@ Add 'google_bigquery' to your application's Gemfile or install it yourself as:
 
 ## Rails / ActiveRecord:
 
-This gem supports ActiveRecord >= 4
+This gem supports ActiveRecord 4.0 / 4.1. support for 4.2 is on the way.
 
 #### Configure GoogleBigQuery:
 
