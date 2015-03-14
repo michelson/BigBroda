@@ -15,17 +15,19 @@ So, use BigQuery as an OLAP (Online Analytical Processing) service, not as OLTP 
 
 ## Installation
 
-Add 'google_bigquery' to your application's Gemfile or install it yourself as:
+Add 'bigbroda' to your application's Gemfile or install it yourself as:
 
     $ gem install bigbroda
 
 ## Rails / ActiveRecord:
 
-This gem supports ActiveRecord 4.0 / 4.1. support for 4.2 is on the way.
+This gem supports ActiveRecord 4.0 / 4.1.
+
+Support for 4.2 is on the way!.
 
 #### Configure GoogleBigQuery:
 
-    rails g google_bigquery:install
+    rails g bigbroda:install
 
 Or generate a file in config/initializers/bigquery.rb with the following contents:
 
