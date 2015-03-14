@@ -59,7 +59,7 @@ class Post < ActiveRecord::Base
 end
 
 def create_tables
-  @table = GoogleBigquery::Table.create(@project, @name, @table_body )
+  @table = BigBroda::Table.create(@project, @name, @table_body )
 
   @rows =   {"rows"=> [
                         {
@@ -70,7 +70,7 @@ def create_tables
                         }
                       ]}
 
-  GoogleBigquery::TableData.create(@project, @name, @table_name , @rows )
+  BigBroda::TableData.create(@project, @name, @table_name , @rows )
 end
 
 describe "ActiveRecord Adapter", :vcr => { :allow_unused_http_interactions => true } do
@@ -84,7 +84,7 @@ describe "ActiveRecord Adapter", :vcr => { :allow_unused_http_interactions => tr
 
     VCR.use_cassette("ActiveRecord_Adapter/authorize_config") do
       config_setup
-      @auth = GoogleBigquery::Auth.new
+      @auth = BigBroda::Auth.new
       @auth.authorize
       @name = "rspec_schema"
       @project = config_options["email"].match(/(\d*)/)[0]
@@ -114,7 +114,7 @@ describe "ActiveRecord Adapter", :vcr => { :allow_unused_http_interactions => tr
 
   before :each do
     VCR.use_cassette("ActiveRecord_Adapter/create_each") do
-      GoogleBigquery::Dataset.create(@project,
+      BigBroda::Dataset.create(@project,
         {"datasetReference"=> { "datasetId" => @name }} )
       create_tables
     end
@@ -122,7 +122,7 @@ describe "ActiveRecord Adapter", :vcr => { :allow_unused_http_interactions => tr
 
   after :each do
     VCR.use_cassette("ActiveRecord_Adapter/after_each") do
-      GoogleBigquery::Dataset.delete(@project, @name)
+      BigBroda::Dataset.delete(@project, @name)
     end
   end
 
@@ -137,7 +137,7 @@ describe "ActiveRecord Adapter", :vcr => { :allow_unused_http_interactions => tr
       #User.create(name: "frank capra")
       #User.find_by(id: "some-id-1393025921")
       #User.where("id =? and name= ?", "some-id-1393025921", "User 2014-02-21 20:38:41 -0300")
-      binding.pry
+
       expect(User.count).to be 1
       expect(User.first).to be_an_instance_of User
       expect(User.all.size).to be 1
@@ -148,7 +148,7 @@ describe "ActiveRecord Adapter", :vcr => { :allow_unused_http_interactions => tr
 
     before :each do
       VCR.use_cassette("ActiveRecord_Adapter/after_each") do
-        GoogleBigquery::Table.delete(@project, @name, "users")
+        BigBroda::Table.delete(@project, @name, "users")
         migration.up; User.reset_column_information
       end
     end
@@ -198,7 +198,7 @@ describe "ActiveRecord Adapter", :vcr => { :allow_unused_http_interactions => tr
       }
 
       it "users_posts" do
-        binding.pry
+        #binding.pry
         User.create(name: "ALF")
         #sleep 50
         post = User.first.posts.create(title: "yeah")

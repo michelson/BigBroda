@@ -40,14 +40,14 @@ module ActiveRecord
   end
 
   module ConnectionHandling # :nodoc:
-    # bigquery adapter reuses GoogleBigquery::Auth.
+    # bigquery adapter reuses BigBroda::Auth.
     def bigquery_connection(config)
 
       # Require database.
       unless config[:database]
         raise ArgumentError, "No database file specified. Missing argument: database"
       end
-      db = GoogleBigquery::Auth.authorized? ? GoogleBigquery::Auth.client : GoogleBigquery::Auth.new.authorize
+      db = BigBroda::Auth.authorized? ? BigBroda::Auth.client : BigBroda::Auth.new.authorize
       #db #quizas deberia ser auth.api o auth.client
 
       #In case we are using a bigquery adapter as standard config in database.yml
@@ -113,7 +113,7 @@ module ActiveRecord
                           }]
                 }
       conn_cfg = self.class.connection_config
-      result = GoogleBigquery::TableData.create(conn_cfg[:project],
+      result = BigBroda::TableData.create(conn_cfg[:project],
         conn_cfg[:database],
         self.class.table_name ,
         @rows )
@@ -341,7 +341,7 @@ module ActiveRecord
       def bigquery_export(bucket_location = nil)
         bucket_location = bucket_location.nil? ? "#{table_name}.json" : bucket_location
         cfg = connection_config
-        GoogleBigquery::Jobs.export(cfg[:project],
+        BigBroda::Jobs.export(cfg[:project],
           cfg[:database],
           table_name,
           "#{cfg[:database]}/#{bucket_location}")
@@ -351,7 +351,7 @@ module ActiveRecord
         bucket_location = bucket_location.empty? ? ["#{cfg[:database]}/#{table_name}.json"] : bucket_location
         cfg = connection_config
         fields = columns.map{|o| {name: o.name, type: o.sql_type, mode: "nullable" } }
-        GoogleBigquery::Jobs.load(cfg[:project],
+        BigBroda::Jobs.load(cfg[:project],
           cfg[:database],
           table_name,
           bucket_location,

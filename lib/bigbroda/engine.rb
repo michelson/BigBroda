@@ -2,10 +2,10 @@
 
 require "active_record/connection_adapters/bigquery_adapter.rb"
 
-module GoogleBigquery
+module BigBroda
   class Engine < ::Rails::Engine
-    
-    isolate_namespace GoogleBigquery
+
+    isolate_namespace BigBroda
     #config.generators do |g|
     #  g.test_framework  :rspec,
     #                    :fixture_replacement => :factory_girl ,
@@ -13,7 +13,7 @@ module GoogleBigquery
     #  g.integration_tool :rspec
     #end
 
-    #initializer "require GoogleBigquery" do 
+    #initializer "require BigBroda" do
     #end
 
   end

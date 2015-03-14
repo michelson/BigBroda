@@ -243,20 +243,20 @@ module ActiveRecord
       end
 
       def create_database(database)
-        result = GoogleBigquery::Dataset.create(@config[:project],
+        result = BigBroda::Dataset.create(@config[:project],
           {"datasetReference"=> { "datasetId" => database }} )
         result
       end
 
       def drop_database(database)
-        tables = GoogleBigquery::Table.list(@config[:project], database)["tables"]
+        tables = BigBroda::Table.list(@config[:project], database)["tables"]
         unless tables.blank?
           tables.map!{|o| o["tableReference"]["tableId"]}
           tables.each do |table_id|
-            GoogleBigquery::Table.delete(@config[:project], database, table_id)
+            BigBroda::Table.delete(@config[:project], database, table_id)
           end
         end
-        result = GoogleBigquery::Dataset.delete(@config[:project], database )
+        result = BigBroda::Dataset.delete(@config[:project], database )
         result
       end
 
@@ -340,7 +340,7 @@ module ActiveRecord
           # Don't cache statements if they are not prepared
           #we set prepared_statements to false in config initialization
           #if without_prepared_statement?(binds)
-            result = GoogleBigquery::Jobs.query(@config[:project], {"query"=> sql })
+            result = BigBroda::Jobs.query(@config[:project], {"query"=> sql })
             cols    = result["schema"]["fields"].map{|o| o["name"] }
             records = result["totalRows"].to_i.zero? ? [] : result["rows"].map{|o| o["f"].map{|k,v| k["v"]} }
             stmt = records
@@ -393,7 +393,7 @@ module ActiveRecord
       # SCHEMA STATEMENTS ========================================
 
       def tables(name = nil, table_name = nil) #:nodoc:
-        table = GoogleBigquery::Table.list(@config[:project], @config[:database])
+        table = BigBroda::Table.list(@config[:project], @config[:database])
         return [] if table["tables"].blank?
         table_names = table["tables"].map{|o| o["tableReference"]["tableId"]}
         table_names = table_names.select{|o| o == table_name } if table_name
@@ -406,7 +406,7 @@ module ActiveRecord
 
       # Returns an array of +SQLite3Column+ objects for the table specified by +table_name+.
       def columns(table_name) #:nodoc:
-        schema = GoogleBigquery::Table.get(@config[:project], @config[:database], table_name)
+        schema = BigBroda::Table.get(@config[:project], @config[:database], table_name)
         schema["schema"]["fields"].map do |field|
           mode = field['mode'].present? && field['mode'] == "REQUIRED" ? false : true
           #column expects (name, default, sql_type = nil, null = true)
@@ -464,7 +464,7 @@ module ActiveRecord
                           "schema"=> [fields: hsh]
                       }
 
-        res = GoogleBigquery::Table.create(@config[:project], @config[:database], @table_body )
+        res = BigBroda::Table.create(@config[:project], @config[:database], @table_body )
 
         raise res["error"]["errors"].map{|o| "[#{o['domain']}]: #{o['reason']} #{o['message']}" }.join(", ") if res["error"].present?
       end
@@ -501,7 +501,7 @@ module ActiveRecord
           hsh << {"name"=> column_name, :type=> type}
           fields = [ fields: hsh ]
 
-          res = GoogleBigquery::Table.patch(@config[:project], @config[:database], table_name,
+          res = BigBroda::Table.patch(@config[:project], @config[:database], table_name,
             {"tableReference"=> {
              "projectId" => @config[:project],
              "datasetId" =>@config[:database],
@@ -552,7 +552,7 @@ module ActiveRecord
       end
 
       def drop_table(table_name)
-        GoogleBigquery::Table.delete(@config[:project], @config[:database], table_name )
+        BigBroda::Table.delete(@config[:project], @config[:database], table_name )
       end
 
       def dump_schema_information #:nodoc:
@@ -570,7 +570,7 @@ module ActiveRecord
         end
 
         def table_structure(table_name)
-          structure = GoogleBigquery::Table.get(@config[:project], @config[:database], table_name)["schema"]["fields"]
+          structure = BigBroda::Table.get(@config[:project], @config[:database], table_name)["schema"]["fields"]
           raise(ActiveRecord::StatementInvalid, "Could not find table '#{table_name}'") if structure.empty?
           structure
         end

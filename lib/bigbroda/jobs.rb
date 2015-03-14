@@ -1,16 +1,16 @@
-module GoogleBigquery 
-  class Jobs < GoogleBigquery::Client
+module BigBroda
+  class Jobs < BigBroda::Client
 
     def initialize(client=nil, opts={})
       @client = client
     end
 
     #query
-    #Runs a BigQuery SQL query synchronously and returns query results if the query completes within a specified timeout. 
+    #Runs a BigQuery SQL query synchronously and returns query results if the query completes within a specified timeout.
     def self.query(project_id, body={})
-      res = GoogleBigquery::Auth.client.execute(
-        :api_method=> GoogleBigquery::Auth.api.jobs.query, 
-        :body_object=> body, 
+      res = BigBroda::Auth.client.execute(
+        :api_method=> BigBroda::Auth.api.jobs.query,
+        :body_object=> body,
         :parameters=> {"projectId"=> project_id}
       )
       parse_response(res)
@@ -19,8 +19,8 @@ module GoogleBigquery
 
     #Retrieves the specified job by ID.
     def self.get(project_id , job_id)
-      res = GoogleBigquery::Auth.client.execute(
-        :api_method=> GoogleBigquery::Auth.api.jobs.get, 
+      res = BigBroda::Auth.client.execute(
+        :api_method=> BigBroda::Auth.api.jobs.get,
         :parameters=> {"projectId"=> project_id, "jobId"=>job_id}
       )
       parse_response(res)
@@ -28,8 +28,8 @@ module GoogleBigquery
 
     #Retrieves the results of a query job.
     def self.getQueryResults(project_id , job_id, params={})
-      res = GoogleBigquery::Auth.client.execute(
-        :api_method=> GoogleBigquery::Auth.api.jobs.get_query_results, 
+      res = BigBroda::Auth.client.execute(
+        :api_method=> BigBroda::Auth.api.jobs.get_query_results,
         :parameters=> {"projectId"=> project_id, "jobId"=>job_id}.merge(params)
       )
       parse_response(res)
@@ -37,9 +37,9 @@ module GoogleBigquery
 
     #Starts a new asynchronous job.
     def self.insert(project_id, body={})
-      res = GoogleBigquery::Auth.client.execute(
-        :api_method=> GoogleBigquery::Auth.api.jobs.insert, 
-        :body_object=> body, 
+      res = BigBroda::Auth.client.execute(
+        :api_method=> BigBroda::Auth.api.jobs.insert,
+        :body_object=> body,
         :parameters=> {"projectId"=> project_id}
       )
       parse_response(res)
@@ -47,8 +47,8 @@ module GoogleBigquery
 
     #Lists all the Jobs in the specified project that were started by the user.
     def self.list(project_id, params={})
-      res = GoogleBigquery::Auth.client.execute(
-        :api_method=> GoogleBigquery::Auth.api.jobs.list, 
+      res = BigBroda::Auth.client.execute(
+        :api_method=> BigBroda::Auth.api.jobs.list,
         :parameters=> {"projectId"=> project_id}.merge(params)
       )
       parse_response(res)
@@ -71,16 +71,16 @@ module GoogleBigquery
        }
       }
 
-      res = GoogleBigquery::Auth.client.execute(
-        :api_method=> GoogleBigquery::Auth.api.jobs.insert, 
-        :body_object=> body, 
+      res = BigBroda::Auth.client.execute(
+        :api_method=> BigBroda::Auth.api.jobs.insert,
+        :body_object=> body,
         :parameters=> {"projectId"=> project_id}
       )
-   
+
       job_id = JSON.parse(res.body)["jobReference"]["jobId"]
       puts 'Waiting for export to complete..'
 
-      loop do 
+      loop do
         status = JSON.parse(self.get(project_id, job_id).body)
 
         if 'DONE' == status['status']['state']
@@ -104,8 +104,8 @@ module GoogleBigquery
         'load'=> {
           'sourceFormat' => "NEWLINE_DELIMITED_JSON",
           'sourceUri' => sources.first,
-          'sourceUris' => sources, 
-          
+          'sourceUris' => sources,
+
           'destinationTable'=> {
             'projectId'=> project_id,
             'datasetId'=> dataset_id,
@@ -114,16 +114,16 @@ module GoogleBigquery
          }
        }
       }
-      res = GoogleBigquery::Auth.client.execute(
-        :api_method=> GoogleBigquery::Auth.api.jobs.insert, 
-        :body_object=> body, 
+      res = BigBroda::Auth.client.execute(
+        :api_method=> BigBroda::Auth.api.jobs.insert,
+        :body_object=> body,
         :parameters=> {"projectId"=> project_id}
       )
       #binding.pry
       job_id = JSON.parse(res.body)["jobReference"]["jobId"]
       puts 'Waiting for import to complete..'
-      
-      loop do 
+
+      loop do
         status = JSON.parse(self.get(project_id, job_id).body)
 
         if 'DONE' == status['status']['state']
@@ -149,7 +149,7 @@ module GoogleBigquery
     private
 
     def self.build_body_object(options)
-      project_id = options[:project_id] 
+      project_id = options[:project_id]
       dataset_id = options[:dataset_id]
       table_id   = options[:table_id]
       bucket_location = options[:bucket_location]
