@@ -212,6 +212,7 @@ Note:
 + Big query does not provide a way to update columns nor delete, so update_column, or remove_column migration are cancelled with an catched exception.
 + Also the schema_migrations table is not created in DB, is created as a json file in db/schema_migrations.json instead. Be sure to add the file in your version control.
 
+
 ## Standalone Client:
 
 ### Configuration setup:
@@ -383,6 +384,21 @@ BigBroda::TableData.create(@project, @name, @table_name , @rows )
 
 ```ruby
 BigBroda::TableData.list(@project, @dataset_id, @table_name)
+```
+
+## Testing:
+
+### Install deps
+
+`appraisal install`
+
+### Run rspec suite for versions:
+
+```
+appraisal rails-3 rake spec
+appraisal rails-4.0.3 rake spec
+appraisal rails-4.1 rake spec
+appraisal rails-4.2 rake spec
 ```
 
 
