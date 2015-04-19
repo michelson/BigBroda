@@ -1,7 +1,7 @@
 PATH
   remote: ../
   specs:
-    bigbroda (0.0.7)
+    bigbroda (0.1.0.pre)
       activerecord
       activesupport
       google-api-client

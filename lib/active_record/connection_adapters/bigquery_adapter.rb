@@ -75,6 +75,7 @@ module ActiveRecord
     extend ActiveSupport::Concern
     module ClassMethods
       def establish_bq_connection(path)
+        #raise "Rails Version not supported, please use Rails <= 4.1" if self.rails42?
         self.send :include, ActiveRecord::BigQueryPersistence
         self.send :include, ActiveRecord::BigQueryRelation
         self.send :include, ActiveRecord::BigQuerying
