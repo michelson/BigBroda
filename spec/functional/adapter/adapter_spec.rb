@@ -46,21 +46,21 @@ class RemovePublishedToUser < ActiveRecord::Migration
   end
 end
 
-class User < ActiveRecord::Base 
+class User < ActiveRecord::Base
   validates :name, presence: true
   has_many :posts
 
   scope :admins , ->{where(admin: true)}
 end
 
-class Post < ActiveRecord::Base 
+class Post < ActiveRecord::Base
   validates :title, presence: true
   belongs_to :user
 end
 
 def create_tables
-  @table = GoogleBigquery::Table.create(@project, @name, @table_body )
-  
+  @table = BigBroda::Table.create(@project, @name, @table_body )
+
   @rows =   {"rows"=> [
                         {
                           "insertId"=> Time.now.to_i.to_s,
@@ -69,8 +69,8 @@ def create_tables
                           }
                         }
                       ]}
-                      
-  GoogleBigquery::TableData.create(@project, @name, @table_name , @rows )
+
+  BigBroda::TableData.create(@project, @name, @table_name , @rows )
 end
 
 describe "ActiveRecord Adapter", :vcr => { :allow_unused_http_interactions => true } do
@@ -80,11 +80,11 @@ describe "ActiveRecord Adapter", :vcr => { :allow_unused_http_interactions => tr
   let(:add_col_migration) { AddPublishedToUser.new}
   let(:remove_col_migration) { RemovePublishedToUser.new}
 
-  before :all do 
+  before :all do
 
     VCR.use_cassette("ActiveRecord_Adapter/authorize_config") do
       config_setup
-      @auth = GoogleBigquery::Auth.new
+      @auth = BigBroda::Auth.new
       @auth.authorize
       @name = "rspec_schema"
       @project = config_options["email"].match(/(\d*)/)[0]
@@ -93,8 +93,8 @@ describe "ActiveRecord Adapter", :vcr => { :allow_unused_http_interactions => tr
       @table_body = {  "tableReference"=> {
                           "projectId"=> @project,
                           "datasetId"=> @name,
-                          "tableId"=> @table_name}, 
-                        "schema"=> [:fields=>[ 
+                          "tableId"=> @table_name},
+                        "schema"=> [:fields=>[
                                       {:name=> "id", :type=> "string"},
                                       {:name=> "name", :type=> "string", :mode => "REQUIRED"},
                                       {:name=>  "age", :type=> "integer"},
@@ -105,28 +105,28 @@ describe "ActiveRecord Adapter", :vcr => { :allow_unused_http_interactions => tr
                     }
 
       ActiveRecord::Base.establish_connection(
-        :adapter => 'bigquery', 
+        :adapter => 'bigquery',
         :project => @project,
         :database => @name
       )
     end
   end
 
-  before :each do 
+  before :each do
     VCR.use_cassette("ActiveRecord_Adapter/create_each") do
-      GoogleBigquery::Dataset.create(@project, 
+      BigBroda::Dataset.create(@project,
         {"datasetReference"=> { "datasetId" => @name }} )
-      create_tables     
+      create_tables
     end
   end
 
-  after :each do 
+  after :each do
     VCR.use_cassette("ActiveRecord_Adapter/after_each") do
-      GoogleBigquery::Dataset.delete(@project, @name) 
+      BigBroda::Dataset.delete(@project, @name)
     end
   end
 
-  describe "adapter" do 
+  describe "adapter" do
 
     it "simple quering", :vcr do
       #sleep 50
@@ -137,6 +137,7 @@ describe "ActiveRecord Adapter", :vcr => { :allow_unused_http_interactions => tr
       #User.create(name: "frank capra")
       #User.find_by(id: "some-id-1393025921")
       #User.where("id =? and name= ?", "some-id-1393025921", "User 2014-02-21 20:38:41 -0300")
+
       expect(User.count).to be 1
       expect(User.first).to be_an_instance_of User
       expect(User.all.size).to be 1
@@ -144,15 +145,15 @@ describe "ActiveRecord Adapter", :vcr => { :allow_unused_http_interactions => tr
   end
 
   describe "migrations" do
-    
-    before :each do 
+
+    before :each do
       VCR.use_cassette("ActiveRecord_Adapter/after_each") do
-        GoogleBigquery::Table.delete(@project, @name, "users") 
-        migration.up; User.reset_column_information 
+        BigBroda::Table.delete(@project, @name, "users")
+        migration.up; User.reset_column_information
       end
     end
-   
-    describe '#up', vcr: {:record => :new_episodes} do     
+
+    describe '#up', vcr: {:record => :new_episodes} do
       it 'adds the created_at & updated_at column', :vcr do
         User.columns_hash.should have_key('created_at')
         User.columns_hash.should have_key('updated_at')
@@ -160,43 +161,44 @@ describe "ActiveRecord Adapter", :vcr => { :allow_unused_http_interactions => tr
     end
 
     describe '#down', vcr: {:record => :new_episodes} do
-      before { 
-        migration.down; User.reset_column_information 
+      before {
+        migration.down; User.reset_column_information
       }
-     
+
       it 'adds the email_at_utc_hour column' do
         User.should_not be_table_exists
       end
 
     end
 
-    #describe "add column", vcr: {:record => :new_episodes} do 
-    #  before { 
-    #    add_col_migration.change; User.reset_column_information 
+    #describe "add column", vcr: {:record => :new_episodes} do
+    #  before {
+    #    add_col_migration.change; User.reset_column_information
     #  }
-     
+
     #  it 'adds published column' do
     #    #binding.pry
     #    User.columns_hash.should have_key('published')
     #  end
     #end
 
-    describe "remove column", vcr: {:record => :new_episodes} do 
-      before { 
-        add_col_migration.change; User.reset_column_information 
+    describe "remove column", vcr: {:record => :new_episodes} do
+      before {
+        add_col_migration.change; User.reset_column_information
       }
-     
+
       it 'should raise error' do
         expect{remove_col_migration.change}.to raise_error
       end
     end
 
-    describe "associations", vcr: {:record => :new_episodes} do 
-      before { 
-        posts_migration.up; Post.reset_column_information 
+    describe "associations", vcr: {:record => :new_episodes} do
+      before {
+        posts_migration.up; Post.reset_column_information
       }
 
-      it "users_posts" do 
+      it "users_posts" do
+        #binding.pry
         User.create(name: "ALF")
         #sleep 50
         post = User.first.posts.create(title: "yeah")

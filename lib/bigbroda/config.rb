@@ -1,6 +1,6 @@
 require "active_support/core_ext/module/attribute_accessors"
 
-module GoogleBigquery
+module BigBroda
   class Config
 
     def self.setup

@@ -1,6 +1,6 @@
 # encoding: UTF-8
 
-module GoogleBigquery
+module BigBroda
   class InstallGenerator < ::Rails::Generators::Base
 
     source_root File.expand_path("../../../templates", __FILE__)
@@ -10,7 +10,7 @@ module GoogleBigquery
 
     def copy_initializer
       say_status("installing", "BigQuery", :green)
-      copy_file "bigquery.rb.erb", "config/initializers/bigquery.rb"
+      copy_file "bigquery.rb.erb", "config/initializers/bigbroda.rb"
     end
 
     def show_readme

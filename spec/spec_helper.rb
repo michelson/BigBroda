@@ -1,7 +1,7 @@
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 require 'rspec'
 require 'debugger' if Gem.ruby_version < Gem::Version.new('2.0')
-require File.join(File.dirname(__FILE__), '../lib', 'google_bigquery')
+require File.join(File.dirname(__FILE__), '../lib', 'bigbroda')
 require 'stringio'
 require "pry"
 require "certified"
@@ -33,7 +33,7 @@ RSpec.configure do |config|
   end
 
   def config_setup
-    GoogleBigquery::Config.setup do |config|
+    BigBroda::Config.setup do |config|
       config.pass_phrase = config_options["pass_phrase"]
       config.key_file    = config_options["key_file"]
       config.scope       = config_options["scope"]

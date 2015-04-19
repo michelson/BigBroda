@@ -1,11 +1,11 @@
 # coding: utf-8
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'google_bigquery/version'
+require 'bigbroda/version'
 
 Gem::Specification.new do |spec|
   spec.name          = "bigbroda"
-  spec.version       = GoogleBigquery::VERSION
+  spec.version       = BigBroda::VERSION
   spec.authors       = ["miguel michelson"]
   spec.email         = ["miguelmichelson@gmail.com"]
   spec.description   = "GoogleBigQuery ActiveRecord Adapter & standalone API client"

@@ -1,10 +1,10 @@
 # encoding: UTF-8
 
-module GoogleBigquery
+module BigBroda
   class Railtie < ::Rails::Railtie
     config.before_configuration do
       require "#{Rails.root}/config/initializers/bigquery"
-      GoogleBigquery::Auth.new.authorize
+      BigBroda::Auth.new.authorize
     #  if config.action_view.javascript_expansions
     #    config.action_view.javascript_expansions[:high_charts] |= %w(highcharts exporting)
     #  end
@@ -19,7 +19,7 @@ module GoogleBigquery
     rake_tasks do
       require "active_record/base"
       require "active_record/tasks/bigquery_database_tasks"
-      
+
       #ActiveRecord::Tasks::DatabaseTasks.seed_loader = Rails.application
       #ActiveRecord::Tasks::DatabaseTasks.env = Rails.env
 

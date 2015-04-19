@@ -1,12 +1,12 @@
-module GoogleBigquery
+module BigBroda
   class Client
 
     attr_accessor :options, :api, :client
 
     def initialize(opts = {})
 
-      @api   ||= GoogleBigquery::Auth.api
-      @client ||= GoogleBigquery::Auth.client
+      @api   ||= BigBroda::Auth.api
+      @client ||= BigBroda::Auth.client
       #@auth.authorize # check expiration and cache ?
 
       self.tap do |client|

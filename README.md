@@ -15,22 +15,24 @@ So, use BigQuery as an OLAP (Online Analytical Processing) service, not as OLTP 
 
 ## Installation
 
-Add 'google_bigquery' to your application's Gemfile or install it yourself as:
+Add 'bigbroda' to your application's Gemfile or install it yourself as:
 
     $ gem install bigbroda
 
 ## Rails / ActiveRecord:
 
-This gem supports ActiveRecord >= 4
+This gem supports ActiveRecord 4.0 / 4.1.
+
+Support for 4.2 is on the way!.
 
 #### Configure GoogleBigQuery:
 
-    rails g google_bigquery:install
+    rails g bigbroda:install
 
 Or generate a file in config/initializers/bigquery.rb with the following contents:
 
 ```ruby
-GoogleBigquery::Config.setup do |config|
+BigBroda::Config.setup do |config|
   config.pass_phrase = ["pass_phrase"]
   config.key_file    = ["key_file"]
   config.scope       = ["scope"]
@@ -210,16 +212,17 @@ Note:
 + Big query does not provide a way to update columns nor delete, so update_column, or remove_column migration are cancelled with an catched exception.
 + Also the schema_migrations table is not created in DB, is created as a json file in db/schema_migrations.json instead. Be sure to add the file in your version control.
 
+
 ## Standalone Client:
 
 ### Configuration setup:
 
   https://developers.google.com/bigquery/docs/authorization
 
-  Configure GoogleBigquery client:
+  Configure BigBroda client:
 
 ```ruby
-GoogleBigquery::Config.setup do |config|
+BigBroda::Config.setup do |config|
   config.pass_phrase = "notasecret"
   config.key_file    = /location/to_your/key_file.p12
   config.scope       = "https://www.googleapis.com/auth/bigquery"
@@ -233,7 +236,7 @@ retries indicates the number of times to retry on recoverable errors (no retries
   And authorize client:
 
 ```ruby
-@auth = GoogleBigquery::Auth.new
+@auth = BigBroda::Auth.new
 @auth.authorize
 ```
   Then you are ready to go!
@@ -244,7 +247,7 @@ retries indicates the number of times to retry on recoverable errors (no retries
   https://developers.google.com/bigquery/docs/reference/v2/projects
 
 ```ruby
-GoogleBigquery::Project.list["projects"]
+BigBroda::Project.list["projects"]
 ```
 
 ### Jobs
@@ -258,13 +261,13 @@ BigQuery can export up to 1 GB of data per file. If you plan to export more than
 Note: it may take a while.
 
 ```ruby
-  GoogleBigquery::Jobs.export(project_id, dataset_id, table_id, bucket_location)
+  BigBroda::Jobs.export(project_id, dataset_id, table_id, bucket_location)
 ```
 
 #### Query
 
 ```ruby
-GoogleBigquery::Jobs.query(@project, {"query"=> "SELECT * FROM [#{@dataset_id}.#{@table_name}] LIMIT 1000" })
+BigBroda::Jobs.query(@project, {"query"=> "SELECT * FROM [#{@dataset_id}.#{@table_name}] LIMIT 1000" })
 ```
 
 
@@ -275,19 +278,19 @@ GoogleBigquery::Jobs.query(@project, {"query"=> "SELECT * FROM [#{@dataset_id}.#
 #### List:
 
 ```ruby
-GoogleBigquery::Dataset.list(@project_id)
+BigBroda::Dataset.list(@project_id)
 ```
 
 #### Create/Insert:
 
 ```ruby
-GoogleBigquery::Dataset.create(@project, {"datasetReference"=> { "datasetId" => @dataset_id }} )
+BigBroda::Dataset.create(@project, {"datasetReference"=> { "datasetId" => @dataset_id }} )
 ```
 
 #### Delete:
 
 ```ruby
-GoogleBigquery::Dataset.delete(@project, @dataset_id }} )
+BigBroda::Dataset.delete(@project, @dataset_id }} )
 ```
 
 #### Update/Patch:
@@ -295,7 +298,7 @@ GoogleBigquery::Dataset.delete(@project, @dataset_id }} )
   Updates information in an existing dataset. The update method replaces the entire dataset resource, whereas the patch method only replaces fields that are provided in the submitted dataset resource.
 
 ```ruby
-GoogleBigquery::Dataset.update(@project, @dataset_id,
+BigBroda::Dataset.update(@project, @dataset_id,
       {"datasetReference"=> {
        "datasetId" =>@dataset_id },
       "description"=> "foobar"} )
@@ -305,7 +308,7 @@ GoogleBigquery::Dataset.update(@project, @dataset_id,
   Updates information in an existing dataset. The update method replaces the entire dataset resource, whereas the patch method only replaces fields that are provided in the submitted dataset resource. This method supports patch semantics.
 
 ```ruby
-GoogleBigquery::Dataset.patch(@project, @dataset_id,
+BigBroda::Dataset.patch(@project, @dataset_id,
         {"datasetReference"=> {
          "datasetId" =>@dataset_id },
         "description"=> "foobar"} )
@@ -331,13 +334,13 @@ GoogleBigquery::Dataset.patch(@project, @dataset_id,
                   ]
       }
 
-GoogleBigquery::Table.create(@project, @dataset_id, @table_body
+BigBroda::Table.create(@project, @dataset_id, @table_body
 ```
 
 #### Update:
 
 ```ruby
-    GoogleBigquery::Table.update(@project, @dataset_id, @table_name,
+    BigBroda::Table.update(@project, @dataset_id, @table_name,
         {"tableReference"=> {
          "projectId" => @project, "datasetId" =>@dataset_id, "tableId"  => @table_name },
         "description"=> "foobar"} )
@@ -346,13 +349,13 @@ GoogleBigquery::Table.create(@project, @dataset_id, @table_body
 #### Delete:
 
 ```ruby
-GoogleBigquery::Table.delete(@project, @dataset_id, @table_name )
+BigBroda::Table.delete(@project, @dataset_id, @table_name )
 ```
 
 #### List:
 
 ```ruby
-    GoogleBigquery::Table.list(@project, @dataset_id )
+    BigBroda::Table.list(@project, @dataset_id )
 ```
 
 ### Table Data
@@ -373,14 +376,29 @@ Streaming data into BigQuery is free for an introductory period until January 1s
                       }
                     ]}
 
-GoogleBigquery::TableData.create(@project, @name, @table_name , @rows )
+BigBroda::TableData.create(@project, @name, @table_name , @rows )
 ```
 
 
 #### List
 
 ```ruby
-GoogleBigquery::TableData.list(@project, @dataset_id, @table_name)
+BigBroda::TableData.list(@project, @dataset_id, @table_name)
+```
+
+## Testing:
+
+### Install deps
+
+`appraisal install`
+
+### Run rspec suite for versions:
+
+```
+appraisal rails-3 rake spec
+appraisal rails-4.0.3 rake spec
+appraisal rails-4.1 rake spec
+appraisal rails-4.2 rake spec
 ```
 
 
