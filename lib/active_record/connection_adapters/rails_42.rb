@@ -358,21 +358,41 @@ module ActiveRecord
         end
       end
 
+      # def exec_query(sql, name = nil, binds = [])
+      #   binding.pry
+      #   log(sql, name, binds) do
+
+      #     # Don't cache statements if they are not prepared
+      #     #if without_prepared_statement?(binds)
+      #       result = BigBroda::Jobs.query(@config[:project], {"query"=> sql })
+      #       cols    = result["schema"]["fields"].map{|o| o["name"] }
+      #       records = result["totalRows"].to_i.zero? ? [] : result["rows"].map{|o| o["f"].map{|k,v| k["v"]} }
+      #       stmt = records
+      #     #else
+      #       #binding.pry
+      #       #BQ does not support prepared statements, yiak!
+      #     #end
+
+      #     ActiveRecord::Result.new(cols, stmt)
+      #   end
+      # end
+
+      class JobIncomplete < Exception
+      end
+
       def exec_query(sql, name = nil, binds = [])
-        binding.pry
         log(sql, name, binds) do
-
-          # Don't cache statements if they are not prepared
-          #if without_prepared_statement?(binds)
+          result = nil
+          Retriable.retriable on: JobIncomplete, base_interval: 1, max_interval: 5, tries: 60 do
             result = BigBroda::Jobs.query(@config[:project], {"query"=> sql })
-            cols    = result["schema"]["fields"].map{|o| o["name"] }
-            records = result["totalRows"].to_i.zero? ? [] : result["rows"].map{|o| o["f"].map{|k,v| k["v"]} }
-            stmt = records
-          #else
-            #binding.pry
-            #BQ does not support prepared statements, yiak!
-          #end
-
+            unless result['jobComplete']
+              log("BigQuery Job Incomplete, trying again, #{Time.now}", nil) {}
+              raise JobIncomplete
+            end
+          end
+          cols    = result["schema"]["fields"].map{|o| o["name"] }
+          records = result["totalRows"].to_i.zero? ? [] : result["rows"].map{|o| o["f"].map{|k,v| k["v"]} }
+          stmt = records
           ActiveRecord::Result.new(cols, stmt)
         end
       end

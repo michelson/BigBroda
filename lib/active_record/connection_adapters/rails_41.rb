@@ -334,9 +334,6 @@ module ActiveRecord
         end
       end
 
-      class JobIncomplete < Exception
-      end
-
       # def exec_query(sql, name = nil, binds = [])
       #   log(sql, name, binds) do
 
@@ -355,6 +352,9 @@ module ActiveRecord
       #     ActiveRecord::Result.new(cols, stmt)
       #   end
       # end
+
+      class JobIncomplete < Exception
+      end
 
       def exec_query(sql, name = nil, binds = [])
         log(sql, name, binds) do
